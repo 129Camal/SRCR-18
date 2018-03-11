@@ -21,9 +21,9 @@
 %-------------------------------------------------------------------------------------------
 % Base de conhecimento com informação dos utentes, prestadores e cuidados
 
-:-dynamic(utente/4).
-:-dynamic(prestador/4).
-:-dynamic(cuidado/5).
+:- dynamic utente/4.
+:- dynamic prestador/4.
+:- dynamic cuidado/5.
 
 %-------------------------------------------------------------------------------------------
 %Extensão do predicado utente: IdUT, Nome, Idade, Morada -> {V,F}
