@@ -21,9 +21,9 @@
 % -------------------------------------------------------------------------------------------
 %Base de conhecimento com informação dos utentes, prestadores e cuidados
 
-:- dynamic utente/4
-:-dynamic prestador/4
-:- dynamic cuidado/5
+:- dynamic utente/4.
+:- dynamic prestador/4.
+:- dynamic cuidado/5.
 
 % -------------------------------------------------------------------------------------------
 %Extensão do predicado utente: IdUT, Nome, Idade, Morada -> {V,F}
@@ -62,7 +62,7 @@ insere(T) :-retract(T),!,fail.
 
 
 %Extensão do predicado evolução: Termo -> {V,F}
-evolução(T):- solucoes(Inv,+T::Inv,Lista),
+evolucao(T):- solucoes(Inv,+T::Inv,Lista),
 			  inserir(T),
 			  teste(Lista).
 
