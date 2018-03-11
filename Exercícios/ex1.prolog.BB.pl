@@ -1,5 +1,5 @@
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% SIST. REPR. CONHECIMENTO E RACIOCINIO - MiEI
+% SIST. REPR. CONHECIMENTO E RACIOCINIO - MiEI/3
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Base de Conhecimento com informacao sobre um universo de discurso na área da prestação de cuidados de saúde.
@@ -7,48 +7,42 @@
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % SICStus PROLOG: Declaracoes iniciais
 
-:- set_prolog_flag( discontiguous_warnings,off ).
-:- set_prolog_flag( single_var_warnings,off ).
-:- set_prolog_flag( unknown,fail ).
+:-set_prolog_flag( discontiguous_warnings,off ).
+:-set_prolog_flag( single_var_warnings,off ).
+:-set_prolog_flag( unknown,fail ).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Definição de invariante
 
-:- op(900,xfy,'::').
+:-op(900,xfy,'::').
 
-% -------------------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------------------
 % BASE DE CONHECIMENTO
-% -------------------------------------------------------------------------------------------
-%Base de conhecimento com informação dos utentes, prestadores e cuidados
+%-------------------------------------------------------------------------------------------
+% Base de conhecimento com informação dos utentes, prestadores e cuidados
 
-:- dynamic utente/4
-:-dynamic prestador/4
-:- dynamic cuidado/5
+:-dynamic(utente/4).
+:-dynamic(prestador/4).
+:-dynamic(cuidado/5).
 
-% -------------------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------------------
 %Extensão do predicado utente: IdUT, Nome, Idade, Morada -> {V,F}
 
-utente(1,'Pascoal',38,'Rua Limpa').
-
-%todo: inventar mais 
+utente(1,Pascoal,38,Rua Limpa).
 
 % -------------------------------------------------------------------------------------------
 %Extensão do predicado prestador: IdPrest, Nome, Especialidade, Instituição -> {V,F}
 
 prestador(1,'Zeca Matos','Ortopedia','Hospital Privado de Braga'). 
 
-%todo: inventar mais 
-
 % -------------------------------------------------------------------------------------------
 %Extensão do predicado cuidado: Data, IdUt, IdPrest, Descrição, Custo  -> {V,F}
 
-cuidado('2018-1-1',1,1,10).
-
-%todo: inventar mais 
+cuidado('2018-1-1',1,1,'Ortopedia',10).
 
 % -------------------------------------------------------------------------------------------
 %Extensão do predicado comprimento: Lista, Resultado -> {V,F}
-comprimento([X|Y], R) :- comprimento(Y,Z), 
+comprimento([X|Y],R):- comprimento(Y,Z), 
 						 R is Z+1.
 
 
@@ -57,12 +51,12 @@ remove(T):- retract(T).
 
 
 %Extensão do predicado insere: 
-insere(T) :- assert(T).
-insere(T) :-retract(T),!,fail.
+insere(T):- assert(T).
+insere(T):-retract(T),!,fail.
 
 
 %Extensão do predicado evolução: Termo -> {V,F}
-evolução(T):- solucoes(Inv,+T::Inv,Lista),
+evolucao(T):- solucoes(Inv,+T::Inv,Lista),
 			  inserir(T),
 			  teste(Lista).
 
@@ -79,5 +73,7 @@ teste([X|Y]):- X, teste(Y).
 
 %Extensão do predicado soluções: Q,T, Lista de termos -> {V,F}
 solucoes(Q,T,S):- findall(Q,T,S).
+
+% -------------------------------------------------------------------------------------------
 
 
