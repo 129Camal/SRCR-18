@@ -7,9 +7,9 @@
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % SICStus PROLOG: Declaracoes iniciais
 
-:-set_prolog_flag( discontiguous_warnings,off ).
-:-set_prolog_flag( single_var_warnings,off ).
-:-set_prolog_flag( unknown,fail ).
+:-set_prolog_flag(discontiguous_warnings,off).
+:-set_prolog_flag(single_var_warnings,off).
+:-set_prolog_flag(unknown,fail).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Definição de invariante
@@ -29,19 +29,38 @@
 %Extensão do predicado utente: IdUT, Nome, Idade, Morada -> {V,F}
 
 utente(1,'Pascoal',38,'Rua Limpa').
-
+utente(2,'Zeca',20,'Rua da Caça').
+utente(3,'Anibal',59,'Rua do Gota').
+utente(4,'Maria',42,'Rua dos Peões').
+utente(5,'Carlota',22,'Rua do Speedy').
 % -------------------------------------------------------------------------------------------
 %Extensão do predicado prestador: IdPrest, Nome, Especialidade, Instituição -> {V,F}
 
-prestador(1,'Zeca Matos','Ortopedia','Hospital Privado de Braga'). 
+prestador(1,'Ze','Otorrino',1). 
+prestador(2,'Andreia','Dentaria',1).
+prestador(3,'Guilherme','Dermatologia',1).
+prestador(4,'Manuel','Oncologia',2).
+prestador(5,'Elso','Ortopedia',3).
 
 % -------------------------------------------------------------------------------------------
 %Extensão do predicado cuidado: Data, IdUt, IdPrest, Descrição, Custo  -> {V,F}
 
-cuidado('2018-1-1',1,1,'Ortopedia',10). 
+cuidado('2018-1-1',1,1,'perna',10).
+cuidado('2018-1-1',2,2,'Carie',26).
+cuidado('2018-1-1',3,3,'Acne',15).
+cuidado('2018-1-2',4,4,'Cancro',32).
+cuidado('2018-1-2',5,5,'Fratura do pulso',19).
+
+% -------------------------------------------------------------------------------------------
+%Extensão do predicado instituição: IdInst, Nome, Cidade -> {V,F}
+inst(1,'Hospital Privado de Braga', 'Braga').
+inst(2,'IPO','Porto').
+inst(3,'Hospital S.Joao','Porto').
+
 
 % -------------------------------------------------------------------------------------------
 %Extensão do predicado comprimento: Lista, Resultado -> {V,F}
+comprimento([],[]).
 comprimento([X|Y],R):- comprimento(Y,Z), 
 						 R is Z+1.
 
@@ -99,29 +118,42 @@ utenteNome(Nome,R) :- solucoes((ID,Nome,I,M), utente(ID,Nome,I,M), R).
 utenteIdade(Idade,R) :- solucoes((ID,N,Idade,M),utente(ID,N,Idade,M),R).
 utenteMor(M,R) :- solucoes((ID,N,I,M),utente(ID,N,I,M),R).
 
-% -------------------------------------------------------------
-% Identificar as instituições prestadoras de cuidados de saúde
+% -----------------------------------------------------------------------
+% Identificar instituições prestadoras de cuidados de saúde
 % inst_cuidados: I -> {V,F}
 
-inst_cuidados(R1) :- solucoes(I, prestador(_,_,_,I), R),
+inst_cuidados(R1) :- solucoes(inst(Id,N,C), (inst(Id,N,C), prestador(Idp,_,_,Id), cuidado(_,Idp,_,_,_)), R),
 					apagaRep(R,R1).
 
 apaga1(X,[],[]).
-apaga1(X,[X|Y],Y).
+apaga1(X,[X|Y],T):- apaga1(X,Y,T).
 apaga1(X,[H|Y],[H|R]) :- apaga1(X,Y,R).
 
 apagaRep([],[]).
-apagaRep([X|Y],R) :- apaga1(X,Y,L), apagaRep(L,L1), R = [X|L1].
+apagaRep([X|Y],[X|L1]) :- apaga1(X,Y,L), apagaRep(L,L1).
 
-% -------------------------------------------------------------
+% ------------------------------------------------------------------------
 % Identificar cuidados de saúde prestados por instituição
 % cuidadosI: I,L -> {V,F}
 
-% cuidadosI(I,[]) :- solucoes((d,, cuidado(_,)) % 2 maneiras q pensei: 1. ao usar cuidado, organizar por prestador, buscar inst, tirar rep
-																	 % 2. usar prestador(id e inst) p buscar lista depois predicado p dar cuidados a partir do id do prestador
+cuidados_I(N,R) :- solucoes(cuidado(D,IDU,IDP,Desc,Custo), (inst(Id,N,_), prestador(Idp,_,_,Id), cuidado(D,IDU,Idp,Desc,Custo)),R).
 
 % Identificar cuidados de saúde prestados por cidade
-% cuidados_ICD()
+% cuidados_C: 
+
+cuidados_C(C,R) :- solucoes(cuidado(D,IDU,IDP,Desc,Custo), (inst(ID,_,C), prestador(IDP,_,_,ID), cuidado(D,IDU,IDP,Desc,Custo)),R). 
+				   
 
 % Identificar cuidados de saúde prestados por data
-% cuidados_ICD()
+% cuidados_D: Data, LResultado ->{V,F}
+
+cuidados_D(D,R1) :- solucoes((D,Idu,Idp,Desc,C), cuidado(D,Idu,Idp,Desc,C),R1).
+
+
+% ------------------------------------------------------------------------
+% Identificar os utentes de um prestador/especialidade/instituição
+
+
+
+
+
