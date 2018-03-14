@@ -1,4 +1,4 @@
-%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+﻿%--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % SIST. REPR. CONHECIMENTO E RACIOCINIO - MiEI/3
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -78,7 +78,7 @@ insere(T):-retract(T),!,fail.
 
 %Extensão do predicado evolução: Termo -> {V,F}
 evolucao(T):- solucoes(Inv,+T::Inv,Lista),
-			  inserir(T),
+			  insere(T),
 			  teste(Lista).
 
 
@@ -112,7 +112,35 @@ solucoes(Q,T,S):- findall(Q,T,S).
 
 +cuidado(data,idUt,idPrest,desc,custo) :: (solucoes((d,iU,iP,d,c), cuidado(d,iU,iP,d,c), C), comprimento(C,N), N ==1).
 
-% -------------------------------------------------------------
+
+% Invariante Estrutural:  nao permitir a insercao de conhecimento
+%                         repetido para a instituição
+
++inst(Id,Nome,Cid) :: (solucoes(Id, inst(IdI,n,c),S), comprimento(S,N), N ==1).
+
+% 2-------------------------------------------------------------
+% Remover utentes, prestadores e cuidados de saúde;
+
+% Extensao do predicado removeUtentes : L -> {V,F}
+
+removeUtente(ID) :- involucao(utentes(ID,N,I,M)).
+
+
+% Extensao do predicado removePrestador : L -> {V,F}
+
+removePrestador(ID) :- involucao(prestador(ID,N,E,I)).
+
+% Extensao do predicado removeCuidado: L -> {V,F}
+
+removeCuidado(Dt,IdU,IdP,Desc,C) :- involucao(cuidado(Dt,IdU,IdP,Desc,C)).
+
+
+% Extensao do predicado removeInst: L -> {V,F}
+
+removeInst(IdInst) :- involucao(inst(IdInst,N,C)).
+
+
+% 3-------------------------------------------------------------
 % Identificar os utentes por critérios de seleção 
 
 utenteID(ID,R) :- solucoes((ID,N,I,M), utente(ID,N,I,M), R).
@@ -120,7 +148,7 @@ utenteNome(Nome,R) :- solucoes((ID,Nome,I,M), utente(ID,Nome,I,M), R).
 utenteIdade(Idade,R) :- solucoes((ID,N,Idade,M),utente(ID,N,Idade,M),R).
 utenteMor(M,R) :- solucoes((ID,N,I,M),utente(ID,N,I,M),R).
 
-% -----------------------------------------------------------------------
+% 4-----------------------------------------------------------------------
 % Identificar instituições prestadoras de cuidados de saúde
 % inst_cuidados: ListaResultado -> {V,F}
 
@@ -140,7 +168,7 @@ apaga1(X,[H|Y],[H|R]) :- apaga1(X,Y,R).
 apagaRep([],[]).
 apagaRep([X|Y],[X|L1]) :- apaga1(X,Y,L), apagaRep(L,L1).
 
-% ------------------------------------------------------------------------
+% 5------------------------------------------------------------------------
 % Identificar cuidados de saúde prestados por instituição
 % cuidadosI: I,L -> {V,F}
 
@@ -158,7 +186,7 @@ cuidados_C(C,R) :- solucoes(cuidado(D,Idu,Idp,Desc,Custo), (inst(ID,_,C), presta
 cuidados_D(D,R1) :- solucoes((D,Idu,Idp,Desc,C), cuidado(D,Idu,Idp,Desc,C),R1).
 
 
-% -----------------------------------------------------------------------------------------
+% 6-----------------------------------------------------------------------------------------
 % Identificar os utentes de um prestador
 % utentes_de_prest: IdPrest, Resultado -> {V,F}
 
@@ -179,7 +207,7 @@ utentes_de_esp(Esp,R) :- solucoes(utente(Id,N,Idd,M), (cuidado(_,Id,Idp,_,_), pr
 utentes_de_inst(NomeI,R) :- solucoes(utente(Id,N,Idd,M), (cuidado(_,Id,Idp,_,_), prestador(Idp,_,_,Idinst), inst(Idinst,NomeI,_), utente(Id,N,Idd,M)), R).
 
 
-% ------------------------------------------------------------------------------------------
+% 7------------------------------------------------------------------------------------------
 % Identificar cuidados de saúde realizados por utente
 % cuidados_por_utente: IdUt, ListaResultado -> {V,F}
 
@@ -196,7 +224,7 @@ cuidados_por_utente(Idu,R) :- solucoes(cuidado(D,Idu,Idp,Desc,Custo), cuidado(D,
 cuidados_por_prest(Idp,R) :- solucoes(cuidado(D,Idu,Idp,Desc,Custo), (cuidado(D,Idu,Idp,Desc,Custo), prestador(Idp,_,_,_)), R).
 
 
-% -----------------------------------------------------------------------------------------
+% 8-----------------------------------------------------------------------------------------
 % Determinar todas instituições a que um utente já recorreu
 % todas_inst: Idu, ListaResultado -> {V,F}
 
@@ -211,7 +239,7 @@ todos_prest(Idu,R) :- solucoes(prestador(Idp,N,Esp,Idi), (prestador(Idp,N,Esp,Id
 					  apagaRep(R1,R).
 
 
-% -----------------------------------------------------------------------------------------
+% 9-----------------------------------------------------------------------------------------
 % Calcular o custo total dos cuidados de saúde por utente/especialidade/prestador/datas
 % custo_utente: Idu, Resultado -> {V,f}
 
