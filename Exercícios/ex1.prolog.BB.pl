@@ -29,27 +29,29 @@
 %Extensão do predicado utente: IdUT, Nome, Idade, Morada -> {V,F}
 
 utente(1,'Pascoal',38,'Rua Limpa').
-utente(2,'Zeca',20,'Rua da Caça').
+utente(2,'Zeca',20,'Rua da Capa').
 utente(3,'Anibal',59,'Rua do Gota').
-utente(4,'Maria',42,'Rua dos Peões').
+utente(4,'Maria',42,'Rua dos Peoes').
 utente(5,'Carlota',22,'Rua do Speedy').
 % -------------------------------------------------------------------------------------------
-%Extensão do predicado prestador: IdPrest, Nome, Especialidade, Instituição -> {V,F}
+%Extensão do predicado prestador: IdPrest, Nome, Especialidade, IdInstituição -> {V,F}
 
 prestador(1,'Ze','Otorrino',1). 
 prestador(2,'Andreia','Dentaria',1).
 prestador(3,'Guilherme','Dermatologia',1).
 prestador(4,'Manuel','Oncologia',2).
 prestador(5,'Elso','Ortopedia',3).
+prestador(6,'Bino','Ginecologia', 3).
 
 % -------------------------------------------------------------------------------------------
 %Extensão do predicado cuidado: Data, IdUt, IdPrest, Descrição, Custo  -> {V,F}
 
-cuidado('2018-1-1',1,1,'perna',10).
+cuidado('2018-1-1',1,1,'Amigdalite',10).
 cuidado('2018-1-1',2,2,'Carie',26).
 cuidado('2018-1-1',3,3,'Acne',15).
 cuidado('2018-1-2',4,4,'Cancro',32).
 cuidado('2018-1-2',5,5,'Fratura do pulso',19).
+cuidado('2018-1-3',4,6, 'Papa Nicolau', 100).
 
 % -------------------------------------------------------------------------------------------
 %Extensão do predicado instituição: IdInst, Nome, Cidade -> {V,F}
@@ -120,14 +122,20 @@ utenteMor(M,R) :- solucoes((ID,N,I,M),utente(ID,N,I,M),R).
 
 % -----------------------------------------------------------------------
 % Identificar instituições prestadoras de cuidados de saúde
-% inst_cuidados: I -> {V,F}
+% inst_cuidados: ListaResultado -> {V,F}
 
 inst_cuidados(R1) :- solucoes(inst(Id,N,C), (inst(Id,N,C), prestador(Idp,_,_,Id), cuidado(_,Idp,_,_,_)), R),
 					apagaRep(R,R1).
 
-apaga1(X,[],[]).
+% Extensao do predicado que apaga todas ocorrencias de 1 elemento numa lista
+% apaga1: Elemento, Lista, ListaResultado -> {V,F}
+
+apaga1(_,[],[]).
 apaga1(X,[X|Y],T):- apaga1(X,Y,T).
 apaga1(X,[H|Y],[H|R]) :- apaga1(X,Y,R).
+
+% Extensao do predicado que apaga todos os elementos repetidos de uma lista
+% apagaRep: Lista, ListaResultado -> {V,F}
 
 apagaRep([],[]).
 apagaRep([X|Y],[X|L1]) :- apaga1(X,Y,L), apagaRep(L,L1).
@@ -136,12 +144,12 @@ apagaRep([X|Y],[X|L1]) :- apaga1(X,Y,L), apagaRep(L,L1).
 % Identificar cuidados de saúde prestados por instituição
 % cuidadosI: I,L -> {V,F}
 
-cuidados_I(N,R) :- solucoes(cuidado(D,IDU,IDP,Desc,Custo), (inst(Id,N,_), prestador(Idp,_,_,Id), cuidado(D,IDU,Idp,Desc,Custo)),R).
+cuidados_I(N,R) :- solucoes(cuidado(D,Idu,Idp,Desc,Custo), (inst(Id,N,_), prestador(Idp,_,_,Id), cuidado(D,Idu,Idp,Desc,Custo)),R).
 
 % Identificar cuidados de saúde prestados por cidade
 % cuidados_C: 
 
-cuidados_C(C,R) :- solucoes(cuidado(D,IDU,IDP,Desc,Custo), (inst(ID,_,C), prestador(IDP,_,_,ID), cuidado(D,IDU,IDP,Desc,Custo)),R). 
+cuidados_C(C,R) :- solucoes(cuidado(D,Idu,Idp,Desc,Custo), (inst(ID,_,C), prestador(Idp,_,_,ID), cuidado(D,Idu,Idp,Desc,Custo)),R). 
 				   
 
 % Identificar cuidados de saúde prestados por data
@@ -150,10 +158,87 @@ cuidados_C(C,R) :- solucoes(cuidado(D,IDU,IDP,Desc,Custo), (inst(ID,_,C), presta
 cuidados_D(D,R1) :- solucoes((D,Idu,Idp,Desc,C), cuidado(D,Idu,Idp,Desc,C),R1).
 
 
-% ------------------------------------------------------------------------
-% Identificar os utentes de um prestador/especialidade/instituição
+% -----------------------------------------------------------------------------------------
+% Identificar os utentes de um prestador
+% utentes_de_prest: IdPrest, Resultado -> {V,F}
+
+utentes_de_prest(Idp,R) :- solucoes(utente(Idu,N,Idd,M), (cuidado(_,Idu,Idp,_,_), prestador(Idp,_,_,_), utente(Idu,N,Idd,M)),R1),
+						   apagaRep(R1,R).
 
 
 
+% Identificar os utentes de uma especialidade
+% utentes_de_esp: Especialidade, Resultado -> {V,F}
+
+utentes_de_esp(Esp,R) :- solucoes(utente(Id,N,Idd,M), (cuidado(_,Id,Idp,_,_), prestador(Idp,_,Esp,_), utente(Id,N,Idd,M)), R1),
+						 apagaRep(R1,R).
+
+% Identificar os utentes de uma instituição
+% utentes_de_inst: IdPrest, Resultado -> {V,F}
+
+utentes_de_inst(NomeI,R) :- solucoes(utente(Id,N,Idd,M), (cuidado(_,Id,Idp,_,_), prestador(Idp,_,_,Idinst), inst(Idinst,NomeI,_), utente(Id,N,Idd,M)), R).
 
 
+% ------------------------------------------------------------------------------------------
+% Identificar cuidados de saúde realizados por utente
+% cuidados_por_utente: IdUt, ListaResultado -> {V,F}
+
+cuidados_por_utente(Idu,R) :- solucoes(cuidado(D,Idu,Idp,Desc,Custo), cuidado(D,Idu,Idp,Desc,Custo), R).
+
+
+% Identificar cuidados de saúde realizados por instituição
+% cuidados_por_utente: IdUt, ListaResultado -> {V,F}
+
+
+% Identificar cuidados de saúde realizados por prestador
+% cuidados_por_prest: IdPrest, ListaResultado -> {V,F}
+
+cuidados_por_prest(Idp,R) :- solucoes(cuidado(D,Idu,Idp,Desc,Custo), (cuidado(D,Idu,Idp,Desc,Custo), prestador(Idp,_,_,_)), R).
+
+
+% -----------------------------------------------------------------------------------------
+% Determinar todas instituições a que um utente já recorreu
+% todas_inst: Idu, ListaResultado -> {V,F}
+
+todas_inst(Idu,R) :- solucoes(inst(Idi,N,C), (inst(Idi,N,C), cuidado(_,Idu,Idp,_,_), prestador(Idp,_,_,Idi), utente(Idu,_,_,_)), R1),
+					 apagaRep(R1,R).
+
+
+% Determinar todas os prestadores a que um utente já recorreu
+% todos_prest: Idu, ListaResultado -> {V,F}
+
+todos_prest(Idu,R) :- solucoes(prestador(Idp,N,Esp,Idi), (prestador(Idp,N,Esp,Idi), cuidado(_,Idu,Idp,_,_)), R1),
+					  apagaRep(R1,R).
+
+
+% -----------------------------------------------------------------------------------------
+% Calcular o custo total dos cuidados de saúde por utente/especialidade/prestador/datas
+% custo_utente: Idu, Resultado -> {V,f}
+
+custo_utente(Idu,R) :- solucoes(Custo, cuidado(_,Idu,_,_,Custo), R1),
+					   custo_total(R1,R).
+
+
+% custo_esp: Especialidade, Resultado -> {V,f}
+
+custo_esp(Esp,R) :- solucoes(Custo, (cuidado(_,_,Idp,_,Custo), prestador(Idp,_,Esp,_)), R1),
+					custo_total(R1,R).
+
+
+% custo_prest: IdPrest, Resultado -> {V,f}
+
+custo_prest(Idp,R) :- solucoes(Custo, (cuidado(_,_,Idp,_,Custo), prestador(Idp,_,_,_)), R1),
+					  custo_total(R1,R).
+
+
+% custo_data: Data, Resultado -> {V,f} 
+
+custo_data(D,R) :- solucoes(Custo, cuidado(D,_,_,_,Custo),R1),
+				   custo_total(R1,R).
+
+
+% Extensão do predicado para o calculo do custo total de uma lista de custos
+% custo_total: Lista, Resultado -> {V,F}
+
+custo_total([X],X).
+custo_total([X,Y|Z], R) :- custo_total([X+Y|Z], R1), R is R1.
