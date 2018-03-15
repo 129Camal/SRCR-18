@@ -83,12 +83,13 @@ evolucao(T):- solucoes(Inv,+T::Inv,Lista),
 
 
 %Extensão do predicado involucao: Termo -> {V,F}
-involucao(T):- solucoes(I,+T::I,Lista),
+involucao(T):- solucoes(I,-T::I,Lista),
 				teste(Lista),
 				remove(T).
 
 
 %Extensão do predicado teste: Lista -> {V,F}
+teste([]).
 teste([X|Y]):- X, teste(Y).
 
 
@@ -123,7 +124,7 @@ solucoes(Q,T,S):- findall(Q,T,S).
 
 % Extensao do predicado removeUtentes : L -> {V,F}
 
-removeUtente(ID) :- involucao(utentes(ID,N,I,M)).
+removeUtente(ID) :- involucao(utente(ID,_,_,_)).
 
 
 % Extensao do predicado removePrestador : L -> {V,F}
