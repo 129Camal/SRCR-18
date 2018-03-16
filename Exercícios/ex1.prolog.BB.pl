@@ -402,17 +402,15 @@ cuidado_mais_caro(R) :- solucoes(C, cuidado(_,_,_,_,_,C), L), maxLista(L,R1), so
 %Extensão do predicado que ordena cuidados de uma instituição por preço
 % cuidados_por_preco: ListaResultado -> {V,F}
 
-cuidados_por_preco(Idi,R) :- solucoes(((D,Idu,Idp,P,Desc), R1), 
-									  (inst(Idi,_,_), prestador(Idp,_,_,Idi),cuidado(D,Idu,Idp,P,Desc,R1)), L), 
+cuidados_por_preco(Idi,R) :- solucoes((D,Idu,Idp,P,Desc,R1), (inst(Idi,_,_), prestador(Idp,_,_,Idi),cuidado(D,Idu,Idp,P,Desc,R1)), L), 
 							 ordena(L,R).
 
 ordena([],[]).
-ordena([(A,X)],[(B,X)]).
-ordena([(A,X)|Y],R) :- ordena(Y,L), inSort((A,X),L,R).
+ordena([(A,B,C,D,E,X)|Y],R) :- ordena(Y,R1), iSort((A,B,C,D,E,X),R1,R).
 
-inSort((A,X),[],[(A,X)]).
-inSort((A,X),[(B,Y)|Z],[(A,X),(B,Y)|Z]) :- X=<Y.
-inSort((A,X),[(B,Y)|Z],[(B,Y)|R]) :- X>Y, inSort((A,X),Z,R).
+iSort((A,B,C,D,E,X),[],[(A,B,C,D,E,X)]).
+iSort((A,B,C,D,E,X),[(F,G,H,I,J,Y)|Z],[(A,B,C,D,E,X),(F,G,H,I,J,Y)|Z]) :- X=<Y.
+iSort((A,B,C,D,E,X),[(F,G,H,I,J,Y)|Z],[(F,G,H,I,J,Y)|R]) :- X>Y, iSort((A,B,C,D,E,X),Z,R).
 
 %Extensão do predicado que identifica cuidados de saúde por prioridade 
 
