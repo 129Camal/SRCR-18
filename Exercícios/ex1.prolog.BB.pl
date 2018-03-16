@@ -72,7 +72,7 @@ prestador(20,'David','Oncologia',5).
 %Extensão do predicado cuidado: Data, IdUt, IdPrest, Prioridade, Descrição, Custo -> {V,F}
 
 cuidado('2018-1-1',1,1,'Media','Amigdalite',10).
-cuidado('2018-1-1',2,2,'Alta','Carie',26).
+cuidado('2018-1-1',2,1,'Alta','Carie',26).
 cuidado('2018-1-1',3,3,'Baixa','Acne',15).
 cuidado('2018-1-2',4,4,'Alta','Cancro',32).
 cuidado('2018-1-2',5,5,'Media','Fratura do pulso',19).
@@ -336,49 +336,40 @@ custo_total([X,Y|Z], R) :- custo_total([X+Y|Z], R1), R is R1.
 %						EXTRAS
 %----------------------------------------------------------------------
 
-% predicado que dá o número total de utentes
+% predicado que devolve o número total de utentes
 % total_utentes: Resultado -> {V,F}
 
-total_utentes(R) :- solucoes(Id, utente(Id,_,_,_), R).
+total_utentes(R) :- solucoes(Id, utente(Id,_,_,_), L), comprimento(L,R).
 
 
 
-% predicado que dá o número total de prestadores
+% predicado que devolve o número total de prestadores
 % total_prest : R -> {V,F}
 
-total_prestadores(R) :- solucoes(Idp, prestador(Idp,_,_,_), R).
+total_prestadores(R) :- solucoes(Idp, prestador(Idp,_,_,_), L), comprimento(L,R).
 
 
 
-% predicado que dá o número total de cuidados
-% total_cuidados(R) :- solucoes(cuidado(D, cuidado(D,_,_,_,_,_), R).
+% predicado que devolve o número total de cuidados
+total_cuidados(R) :- solucoes(cuidado(D, cuidado(D,_,_,_,_,_), L), comprimento(L,R).
 
 
-% VER ISTO, SE NAO SE CONSEGUIR TIRA-SE 
-
-% predicado que verifica os prestadores saqueadores -- INSERIR PRESTADORES MAS NAO LHE ATRIBUIR CUIDADOS
-% prestador_sem_cuidados : ListaResultado -> {V,F}
-
-% prestador_sem_cuidados(R) :- comprimento(cuidados_por_prest(Idp,R1), R2), R2 == 0, solucoes(prestador(Idp,N,E,I), prestador(Idp,N,E,I), R).
 
 
-% VER QUAL É O PROBLEMA
-% predicado que verifica a especialidade com mais utentes
-% esp_mais_utentes: Resultado -> {V,F}
+%Extensão do predicado que devolve o número de utentes de uma especialidade
+%nr_ut_esp: Especialidade, Resultado -> {V,F}
 
-% esp_mais_utentes(R) TUPLOS. 
+nr_ut_esp(Esp,R) :- solucoes(Idu, (prestador(Idp,_,Esp,_), cuidado(_,Idu,Idp,_,_,_)), L), comprimento(L,R).
 
-%Extensão do predicado que a partir de uma lista de especialidades cria uma lista de listas de utentes de cada especialidade
-% coisa: Lista, ListaResultado -> {V,F}
-coisa([],[]).
-coisa([Esp],R) :- coisa(utentes_de_esp(Esp,R),R).
-coisa([Esp|Y],[L|R1]) :- utentes_de_esp(Esp,L), coisa(Y,R1).
+%Extensão do predicado que devolve a percentagem de utentes de uma especialidade
+%percent_utentes_esp: Especialidade, Resultado -> {V,F}
 
-%Extensão do predicado que a partir de uma lista de listas da outra lista com o comprimento de cada uma das listas 
-% comp : Lista, ListaResultado -> {V,F}
-comp([],[R]) :- comprimento([],R).
-comp([X],[R]) :- comprimento(X,R).
-comp([X|Y],[L|R]) :- comprimento(X,L), comp(Y,R).
+percent_utentes_esp(Esp,R) :- nr_ut_esp(Esp,Res), total_utentes(X), R is (Res*100)/X.
+
+
+
+maxListaTuplo([(X,Y)],(X,Y)).
+maxListaTuplo().
 
 %Extensão do predicado que calcula o máximo de uma lista
 % maxLista: Lista, Resultado -> {V,F}
@@ -388,9 +379,11 @@ maxLista([X|L],R) :- maxLista(L,N), X>N, R is X.
 maxLista([X|L],R) :- maxLista(L,N), X=<N, R is N.
 
 
+
 %Extensão do predicado que verifica a instituição com mais utentes 
 % fazer : predicado extra findall(utentes de 1 inst) e comprimento e retornar tuplo
 %		: + outro predicado recursivo que chama o anterior p todas inst(ja existe este em cima)
+
 
 %Extensão do predicado que verifica o cuidado mais caro da base de conhecimento
 % cuidado_mais_caro: Resultado -> {V,F}
@@ -398,23 +391,39 @@ maxLista([X|L],R) :- maxLista(L,N), X=<N, R is N.
 cuidado_mais_caro(R) :- solucoes(C, cuidado(_,_,_,_,_,C), L), maxLista(L,R1), solucoes((D,Idu,Idp,P,Desc,R1), cuidado(D,Idu,Idp,P,Desc,R1), R).
 
 
-% QUASE QUASE 
+
 %Extensão do predicado que ordena cuidados de uma instituição por preço
 % cuidados_por_preco: ListaResultado -> {V,F}
 
 cuidados_por_preco(Idi,R) :- solucoes((D,Idu,Idp,P,Desc,R1), (inst(Idi,_,_), prestador(Idp,_,_,Idi),cuidado(D,Idu,Idp,P,Desc,R1)), L), 
 							 ordena(L,R).
 
+%Extensão do predicado que ordena uma lista de cuidados
+%ordena: Lista, ListaResultado -> {V,F}
+
 ordena([],[]).
 ordena([(A,B,C,D,E,X)|Y],R) :- ordena(Y,R1), iSort((A,B,C,D,E,X),R1,R).
+
+%Extensão do predicado que insere um cuidado num lista ordenadamente
+%iSort: Cuidado, Lista, ListaResultado -> {V,F}
 
 iSort((A,B,C,D,E,X),[],[(A,B,C,D,E,X)]).
 iSort((A,B,C,D,E,X),[(F,G,H,I,J,Y)|Z],[(A,B,C,D,E,X),(F,G,H,I,J,Y)|Z]) :- X=<Y.
 iSort((A,B,C,D,E,X),[(F,G,H,I,J,Y)|Z],[(F,G,H,I,J,Y)|R]) :- X>Y, iSort((A,B,C,D,E,X),Z,R).
 
-%Extensão do predicado que identifica cuidados de saúde por prioridade 
 
-%Extensão do predicado que da o numero de cuidados com um certa prioridade 
+
+%Extensão do predicado que identifica cuidados de saúde por prioridade
+% cuidados_prio: Prioridade, ListaResultado -> {V,F}
+
+cuidados_prio(Prio,R) :- solucoes(cuidado(D,Idu,Idp,Prio,Desc,C), cuidado(D,Idu,Idp,Prio,Desc,C), R).
+
+
+
+%Extensão do predicado que da o numero de cuidados com um certa prioridade
+% nr_cuidado_prio: Prioridade, ListaResultado -> {V,F}
+
+nr_cuidado_prio(Prio,R) :- solucoes(cuidado(D,Idu,Idp,Prio,Desc,C), cuidado(D,Idu,Idp,Prio,Desc,C), R1), comprimento(R1,R).
 
 
 
