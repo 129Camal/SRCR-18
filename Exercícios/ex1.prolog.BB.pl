@@ -1,4 +1,4 @@
-%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+﻿------------------------------- - - - - - - - - - -  -  -  -  -   -
 % SIST. REPR. CONHECIMENTO E RACIOCINIO - MiEI/3
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -29,6 +29,7 @@
 %-------------------------------------------------------------------------------------------
 %Extensão do predicado utente: IdUT, Nome, Idade, Morada -> {V,F}
 
+utente(1,'Pascoal',38,'Rua Limpa').
 utente(1,'Pascoal',38,'Rua Limpa').
 utente(2,'Zeca',20,'Rua da Capa').
 utente(3,'Anibal',59,'Rua do Gota').
