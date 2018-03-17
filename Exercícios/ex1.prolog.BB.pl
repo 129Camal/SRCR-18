@@ -114,7 +114,7 @@ insere(T):-retract(T),!,fail.
 
 %Extensão do predicado evolução: Termo -> {V,F}
 evolucao(T):- solucoes(Inv,+T::Inv,Lista),
-			  inserir(T),
+			  insere(T),
 			  teste(Lista).
 
 
@@ -141,17 +141,17 @@ concat([X|Y], Z, [X|L]) :- concat(Y,Z,L).
 % Invariante Estrutural:  nao permitir a insercao de conhecimento
 %                         repetido para o utente
 
-+utente(id,nome,idade,morada)::((solucoes(id, utente(idU,n,idd,mor), U), comprimento(U,N), N==1)).
++utente(Id,Nome,Idade,Morada)::((solucoes(Id, utente(Id,Nome,Idade,Morada), U), comprimento(U,N), N==1)).
 
 % Invariante Estrutural:  nao permitir a insercao de conhecimento
 %                         repetido para o prestador
 
-+prestador(idPrest,nome,esp,inst)::((solucoes(id, prestador(id,n,e,itt), P), comprimento(P,N), N==1)).
++prestador(IdPrest,Nome,Esp,Inst)::((solucoes(IdPrest, prestador(IdPrest,Nome,Esp,Inst), P), comprimento(P,N), N==1)).
 
 % Invariante Estrutural:  nao permitir a insercao de conhecimento
 %                         repetido para o cuidado
 
-+cuidado(data,idUt,idPrest,desc,custo) :: (solucoes((d,iU,iP,d,c), cuidado(d,iU,iP,d,c), C), comprimento(C,N), N ==1).
++cuidado(Data,IdU,IdPrest,Prio,Desc,Custo) :: (solucoes((Data,IdU,IdPrest,Prio,Desc,Custo), cuidado(Data,IdU,IdPrest,Prio,Desc,Custo), C), comprimento(C,N), N ==1).
 
 
 
@@ -159,6 +159,17 @@ concat([X|Y], Z, [X|L]) :- concat(Y,Z,L).
 %                         repetido para a instituição
 
 +inst(Id,Nome,Cid) :: (solucoes(Id, inst(Id,Nome,Cid),S), comprimento(S,N), N ==1).
+
+
+%Invariante estrutural para controlo de remoção de utente, prestador, cuidado e instituição
+
+-utente(Idu,N,Idd,M):: (solucoes(Idu, utente(Idu,N,Idd,M), L), comprimento(L,R), R==1).
+
+-prestador(Idp,N,Esp,Inst) :: (solucoes(Idp, prestador(Idp,N,Esp,Inst), L), comprimento(L,R), R==1).
+
+-cuidado(Data,IdU,IdPrest,Prio,Desc,Custo) :: (solucoes((Data,IdU,IdPrest,Prio,Desc,Custo), cuidado(Data,IdU,IdPrest,Prio,Desc,Custo), L), comprimento(L,R), R==1).
+
+-inst(Id,N,C) :: (solucoes(Id, inst(Id,N,C), L), comprimento(L,R), R ==1).
 
 % 1-------------------------------------------------------------
 % Registar utentes, prestadores, cuidados e instituições
@@ -275,10 +286,6 @@ utentes_de_instNome(NomeI,R) :- solucoes(utente(Id,N,Idd,M), (cuidado(_,Id,Idp,_
 cuidados_por_utente(Idu,R) :- solucoes(cuidado(D,Idu,Idp,P,Desc,Custo), cuidado(D,Idu,Idp,P,Desc,Custo), R).
 
 
-% Identificar cuidados de saúde realizados por instituição
-% cuidados_por_utente: IdUt, ListaResultado -> {V,F}
-
-
 % Identificar cuidados de saúde realizados por prestador
 % cuidados_por_prest: IdPrest, ListaResultado -> {V,F}
 
@@ -370,7 +377,7 @@ percent_utentes_esp(Esp,R) :- nr_ut_esp(Esp,Res), total_utentes(X), R is (Res*10
 
 %Extensão do predicado que devolve uma lista com os prestadores que não têm nenhum cuidado associado
 %prest_sem_cuidados: Resultado -> {V,F}
-prest_sem_cuidados(R) :- solucoes(Idp, prestador(Idp,_,_,_),L), solucoes(Idp, (prestador(Idp,_,_,_), cuidado(_,_,Idp,P,_,_)), L1),
+prest_sem_cuidados(R) :- solucoes(Idp, prestador(Idp,_,_,_),L), solucoes(Idp, (prestador(Idp,_,_,_), cuidado(_,_,Idp,_,_,_)), L1),
 				  pertence(L,L1,R1), prest(R1,R).
 
 %Extensão do predicado que a partir de uma lista de id de prestadores devolve uma lista dos respetivos prestadores
@@ -393,14 +400,6 @@ pertence([X|Y],Z,[X|R]) :- not(pertence1(X,Z)), pertence(Y,Z,R).
 pertence([X|Y],Z,R) :- pertence1(X,Z), pertence(Y,Z,R).
 
 
-%Extensão do predicado que calcula o máximo de uma lista
-% maxLista: Lista, Resultado -> {V,F}
-
-maxLista([H],R):- R is H.
-maxLista([X|L],R) :- maxLista(L,N), X>N, R is X.
-maxLista([X|L],R) :- maxLista(L,N), X=<N, R is N.
-
-
 
 % Identificar os utentes de uma instituição dando o id da instituição
 % utentes_de_inst: IdPrest, Resultado -> {V,F}
@@ -411,7 +410,7 @@ utentes_de_instID(Idi,R) :- solucoes(utente(Id,N,Idd,M), (cuidado(_,Id,Idp,_,_,_
 
 %Extensão do predicado que devolve lista com o número de utentes de cada instituição
 %nr_ut_inst: ListaResultado -> {V,F}
-nr_ut_todas_inst(R) :- solucoes(Idi, inst(Idi,_,C), L), nr_ut_inst(L,R).
+nr_ut_todas_inst(R) :- solucoes(Idi, inst(Idi,_,_), L), nr_ut_inst(L,R).
 
 %Extensão do predicado que a partir de uma lista de ids de instituições devolve a lista com o número de utentes de cada uma
 %nr_ut_inst: Lista, ListaResultado -> {V,F}
@@ -426,6 +425,12 @@ nr_ut_inst([Idi|Y],[R|L]) :- utentes_de_instID(Idi,R1), comprimento(R1,R), nr_ut
 
 cuidado_mais_caro(R) :- solucoes(C, cuidado(_,_,_,_,_,C), L), maxLista(L,R1), solucoes((D,Idu,Idp,P,Desc,R1), cuidado(D,Idu,Idp,P,Desc,R1), R).
 
+%Extensão do predicado que calcula o máximo de uma lista
+% maxLista: Lista, Resultado -> {V,F}
+
+maxLista([H],R):- R is H.
+maxLista([X|L],R) :- maxLista(L,N), X>N, R is X.
+maxLista([X|L],R) :- maxLista(L,N), X=<N, R is N.
 
 
 %Extensão do predicado que ordena cuidados de uma instituição por preço
