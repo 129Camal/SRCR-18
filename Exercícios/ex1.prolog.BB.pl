@@ -295,7 +295,7 @@ cuidados_por_utente(Idu,R) :- solucoes(cuidado(D,Idu,Idp,P,Desc,Custo), cuidado(
 % Identificar cuidados de saúde realizados por prestador
 % cuidados_por_prest: IdPrest, ListaResultado -> {V,F}
 
-cuidados_por_prest(Idp,R) :- solucoes(cuidado(D,Idu,Idp,P,Desc,Custo), (cuidado(D,Idu,Idp,P,Desc,Custo), prestador(Idp,_,_,_)), R).
+cuidados_por_prest(Idp,R) :- solucoes(cuidado(D,Idu,Idp,P,Desc,Custo), cuidado(D,Idu,Idp,P,Desc,Custo), R).
 
 
 % 8-----------------------------------------------------------------------------------------
