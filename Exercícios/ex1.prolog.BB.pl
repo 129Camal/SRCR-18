@@ -159,13 +159,14 @@ concat([X|Y], Z, [X|L]) :- concat(Y,Z,L).
 
 +cuidado(Data,IdU,IdPrest,Prio,Desc,Custo) :: (solucoes((Data,IdU,IdPrest,Prio,Desc,Custo), cuidado(Data,IdU,IdPrest,Prio,Desc,Custo), C), comprimento(C,N), N ==1).
 
-
-
 % Invariante Estrutural:  nao permitir a insercao de conhecimento
 %                         repetido para a instituição
 
 +inst(Id,Nome,Cid) :: (solucoes(Id, inst(Id,Nome,Cid),S), comprimento(S,N), N ==1).
 
+%Invariante Esrutural: nao permitir inserir um cuidado com Idu e IdPrest inexistentes
+
++cuidado(Data,IdU,IdPrest,Prio,Desc,Custo):: (utente(IdU,_,_,_), prestador(IdPrest,_,_,_)).
 
 %Invariante estrutural para controlo de remoção de utente, prestador, cuidado e instituição
 
