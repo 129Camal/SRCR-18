@@ -262,10 +262,10 @@ utentes_de_prest(Idp,R) :- solucoes(utente(Idu,N,Idd,M), (cuidado(_,Idu,Idp,_,_,
 utentes_de_esp(Esp,R) :- solucoes(utente(Id,N,Idd,M), (cuidado(_,Id,Idp,_,_,_), prestador(Idp,_,Esp,_), utente(Id,N,Idd,M)), R1),
 						 apagaRep(R1,R).
 
-% Identificar os utentes de uma instituição
+% Identificar os utentes de uma instituição dando o nome da instituição
 % utentes_de_inst: IdPrest, Resultado -> {V,F}
 
-utentes_de_inst(NomeI,R) :- solucoes(utente(Id,N,Idd,M), (cuidado(_,Id,Idp,_,_,_), prestador(Idp,_,_,Idinst), inst(Idinst,NomeI,_), utente(Id,N,Idd,M)), R).
+utentes_de_instNome(NomeI,R) :- solucoes(utente(Id,N,Idd,M), (cuidado(_,Id,Idp,_,_,_), prestador(Idp,_,_,Idinst), inst(Idinst,NomeI,_), utente(Id,N,Idd,M)), R).
 
 
 % 7------------------------------------------------------------------------------------------
@@ -351,7 +351,7 @@ total_prestadores(R) :- solucoes(Idp, prestador(Idp,_,_,_), L), comprimento(L,R)
 
 
 % predicado que devolve o número total de cuidados
-total_cuidados(R) :- solucoes(cuidado(D, cuidado(D,_,_,_,_,_), L), comprimento(L,R).
+total_cuidados(R) :- solucoes(Desc, cuidado(_,_,_,_,Desc,_), L), comprimento(L,R).
 
 
 
@@ -368,8 +368,30 @@ percent_utentes_esp(Esp,R) :- nr_ut_esp(Esp,Res), total_utentes(X), R is (Res*10
 
 
 
-maxListaTuplo([(X,Y)],(X,Y)).
-maxListaTuplo().
+%Extensão do predicado que devolve uma lista com os prestadores que não têm nenhum cuidado associado
+%prest_sem_cuidados: Resultado -> {V,F}
+prest_sem_cuidados(R) :- solucoes(Idp, prestador(Idp,_,_,_),L), solucoes(Idp, (prestador(Idp,_,_,_), cuidado(_,_,Idp,P,_,_)), L1),
+				  pertence(L,L1,R1), prest(R1,R).
+
+%Extensão do predicado que a partir de uma lista de id de prestadores devolve uma lista dos respetivos prestadores
+%prest: Lista, ListaResultado -> {V,F}
+
+prest([Id],R) :- solucoes(prestador(Id,N,E,Inst), prestador(Id,N,E,Inst), R).
+prest([Id|Y],R) :- solucoes(prestador(Id,N,E,Inst), prestador(Id,N,E,Inst), L), prest(Y,R1), concat(L,R1,R).
+
+%Extensão do predicado que verifca se um elemento pertence a uma lista
+%pertence1: Elemento -> {V,F}
+
+pertence1(X,[X|Y]).
+pertence1(X,[Y|Z]) :- pertence1(X,Z).
+
+% retorna lista dos elementos da primeira lista que nao existem na segunda lista
+%pertence: Lista1, Lista2, ListaResultado -> {V,F}
+
+pertence([],_,[]).
+pertence([X|Y],Z,[X|R]) :- not(pertence1(X,Z)), pertence(Y,Z,R).
+pertence([X|Y],Z,R) :- pertence1(X,Z), pertence(Y,Z,R).
+
 
 %Extensão do predicado que calcula o máximo de uma lista
 % maxLista: Lista, Resultado -> {V,F}
@@ -380,9 +402,23 @@ maxLista([X|L],R) :- maxLista(L,N), X=<N, R is N.
 
 
 
-%Extensão do predicado que verifica a instituição com mais utentes 
-% fazer : predicado extra findall(utentes de 1 inst) e comprimento e retornar tuplo
-%		: + outro predicado recursivo que chama o anterior p todas inst(ja existe este em cima)
+% Identificar os utentes de uma instituição dando o id da instituição
+% utentes_de_inst: IdPrest, Resultado -> {V,F}
+
+utentes_de_instID(Idi,R) :- solucoes(utente(Id,N,Idd,M), (cuidado(_,Id,Idp,_,_,_), prestador(Idp,_,_,Idi), inst(Idi,_,_), utente(Id,N,Idd,M)), R).
+
+
+
+%Extensão do predicado que devolve lista com o número de utentes de cada instituição
+%nr_ut_inst: ListaResultado -> {V,F}
+nr_ut_todas_inst(R) :- solucoes(Idi, inst(Idi,_,C), L), nr_ut_inst(L,R).
+
+%Extensão do predicado que a partir de uma lista de ids de instituições devolve a lista com o número de utentes de cada uma
+%nr_ut_inst: Lista, ListaResultado -> {V,F}
+nr_ut_inst([],[]).
+nr_ut_inst([Idi],[R]) :- utentes_de_instID(Idi,R1), comprimento(R1,R).
+nr_ut_inst([Idi|Y],[R|L]) :- utentes_de_instID(Idi,R1), comprimento(R1,R), nr_ut_inst(Y,L).
+
 
 
 %Extensão do predicado que verifica o cuidado mais caro da base de conhecimento
