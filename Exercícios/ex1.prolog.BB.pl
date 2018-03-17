@@ -1,4 +1,4 @@
-﻿%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % SIST. REPR. CONHECIMENTO E RACIOCINIO - MiEI/3
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -24,6 +24,7 @@
 :- dynamic utente/4.
 :- dynamic prestador/4.
 :- dynamic cuidado/6.
+:- dynamic inst/3.
 
 %-------------------------------------------------------------------------------------------
 %Extensão do predicado utente: IdUT, Nome, Idade, Morada -> {V,F}
