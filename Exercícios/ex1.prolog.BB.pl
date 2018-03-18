@@ -1,4 +1,4 @@
-﻿------------------------------- - - - - - - - - - -  -  -  -  -   -
+﻿%--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % SIST. REPR. CONHECIMENTO E RACIOCINIO - MiEI/3
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -24,12 +24,10 @@
 :- dynamic utente/4.
 :- dynamic prestador/4.
 :- dynamic cuidado/6.
-:- dynamic inst/3.
 
 %-------------------------------------------------------------------------------------------
 %Extensão do predicado utente: IdUT, Nome, Idade, Morada -> {V,F}
 
-utente(1,'Pascoal',38,'Rua Limpa').
 utente(1,'Pascoal',38,'Rua Limpa').
 utente(2,'Zeca',20,'Rua da Capa').
 utente(3,'Anibal',59,'Rua do Gota').
@@ -88,10 +86,6 @@ cuidado('2018-2-5',12,15,'Media','Consulta rotina',90).
 cuidado('2018-2-6',13,14,'Media','Ecografia aos ovarios',58).
 cuidado('2018-2-6',14,13,'Alta','Urticaria',5).
 cuidado('2018-2-7',15,12,'Baixa','Por aparelho',2000).
-cuidado('2018-3-5',3,12,'Baixa','Dentes novos',1650).
-cuidado('2108-3-5',8,10,'Media','Nodulos na garganta',8).
-cuidado('2018-1-2',5,5,'Alta','Fratura exposta na perna',54).
-
 
 % -------------------------------------------------------------------------------------------
 %Extensão do predicado instituição: IdInst, Nome, Cidade -> {V,F}
@@ -159,14 +153,13 @@ concat([X|Y], Z, [X|L]) :- concat(Y,Z,L).
 
 +cuidado(Data,IdU,IdPrest,Prio,Desc,Custo) :: (solucoes((Data,IdU,IdPrest,Prio,Desc,Custo), cuidado(Data,IdU,IdPrest,Prio,Desc,Custo), C), comprimento(C,N), N ==1).
 
+
+
 % Invariante Estrutural:  nao permitir a insercao de conhecimento
 %                         repetido para a instituição
 
 +inst(Id,Nome,Cid) :: (solucoes(Id, inst(Id,Nome,Cid),S), comprimento(S,N), N ==1).
 
-%Invariante Esrutural: nao permitir inserir um cuidado com Idu e IdPrest inexistentes
-
-+cuidado(Data,IdU,IdPrest,Prio,Desc,Custo):: (utente(IdU,_,_,_), prestador(IdPrest,_,_,_)).
 
 %Invariante estrutural para controlo de remoção de utente, prestador, cuidado e instituição
 
@@ -220,7 +213,7 @@ removeInst(IdInst) :- involucao(inst(IdInst,_,_)).
 
 % 3-------------------------------------------------------------
 % Identificar os utentes por critérios de seleção 
-
+% TESTAR A VER SE SE USA EVOLUÇAO AQUI
 
 utenteID(ID,R) :- solucoes((ID,N,I,M), utente(ID,N,I,M), R).
 utenteNome(Nome,R) :- solucoes((ID,Nome,I,M), utente(ID,Nome,I,M), R).
@@ -296,7 +289,7 @@ cuidados_por_utente(Idu,R) :- solucoes(cuidado(D,Idu,Idp,P,Desc,Custo), cuidado(
 % Identificar cuidados de saúde realizados por prestador
 % cuidados_por_prest: IdPrest, ListaResultado -> {V,F}
 
-cuidados_por_prest(Idp,R) :- solucoes(cuidado(D,Idu,Idp,P,Desc,Custo), cuidado(D,Idu,Idp,P,Desc,Custo), R).
+cuidados_por_prest(Idp,R) :- solucoes(cuidado(D,Idu,Idp,P,Desc,Custo), (cuidado(D,Idu,Idp,P,Desc,Custo), prestador(Idp,_,_,_)), R).
 
 
 % 8-----------------------------------------------------------------------------------------
