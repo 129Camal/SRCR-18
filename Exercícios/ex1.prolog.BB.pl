@@ -219,7 +219,6 @@ removeInst(IdInst) :- involucao(inst(IdInst,_,_)).
 
 % 3-------------------------------------------------------------
 % Identificar os utentes por critérios de seleção 
-% TESTAR A VER SE SE USA EVOLUÇAO AQUI
 
 utenteID(ID,R) :- solucoes((ID,N,I,M), utente(ID,N,I,M), R).
 utenteNome(Nome,R) :- solucoes((ID,Nome,I,M), utente(ID,Nome,I,M), R).
