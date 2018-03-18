@@ -86,6 +86,8 @@ cuidado('2018-2-5',12,15,'Media','Consulta rotina',90).
 cuidado('2018-2-6',13,14,'Media','Ecografia aos ovarios',58).
 cuidado('2018-2-6',14,13,'Alta','Urticaria',5).
 cuidado('2018-2-7',15,12,'Baixa','Por aparelho',2000).
+cuidado('2018-1-2',5,5,'Alta','Fratura exposta na perna',18).
+cuidado('2018-3-5',8,18,'Raio-X ao coração',400).
 
 % -------------------------------------------------------------------------------------------
 %Extensão do predicado instituição: IdInst, Nome, Cidade -> {V,F}
