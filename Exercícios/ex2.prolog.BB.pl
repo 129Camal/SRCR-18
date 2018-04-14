@@ -101,6 +101,79 @@ inst(5,'Hospital dos Bonecos','Lisboa').
 
 
 % -------------------------------------------------------------------------------------------
+%Extensão do predicado instituição: IdInst, Nome, Cidade -> {V,F}
+data().
+
+
+% ------------------------------------------------------------------------------------------------
+%   Conhecimento Incerto
+% ------------------------------------------------------------------------------------------------
+%um valor nulo do tipo desconhecido e não, necessariamente, de um conjunto determinado de valores.
+
+%Desconhecimento da morada do utente e respetiva excecao
+utente(16,'Joaquina',57,morada_desconhecida).
+utente(17,'Quim',38,morada_desconhecida).
+
+excecao(utente(Idu,N,Idd,M)) :- utente(Idu,N,Idd,morada_desconhecida).
+
+
+%Desconhecimento da idade de um utente mas sabendo que não é 20 anos
+utente(18,'Jonas',idade_desconhecida,'Rua de Cristal').
+-utente(18,'Jonas',20,'Rua de Cristal').
+
+excecao(utente(Idu,N,Idd,M)) :- utente(Idu,N,idade_desconhecida,M).	
+
+
+
+% -------------------------------------------------------------------------------------------------
+%   Conhecimento Impreciso
+% -------------------------------------------------------------------------------------------------
+%valor nulo que pertence a um conjunto de valores bem determinados mas 
+%ao qual nao se sabe qual o valor concreto
+
+%O prestador Amaral trabalha em três instituições diferentes
+%O cuidado do deste prestador pode ter sido efetuado em qualquer uma das instituições.
+
+excecao(prestador(21,'Amaral','Optometria',1)).
+excecao(prestador(21,'Amaral','Optometria',3)).
+excecao(prestador(21,'Amaral','Optometria',5)).
+
+%Devido a problemas na base de conhecimento perderam-se alguns parâmetros 
+%das datas dos cuidados de saúde
+
+%Dia perdido --- DEPOIS VERIFICAR SE TEM QUE TER ALGUM IGUAL EM CIMA NOS CUIDADOS
+excecao(cuidado(data(2018,4,D),6,14,'Alta','Ecografia',30)) :- D >= 1, D =< 30.
+
+%Ano perdido
+excecao(cuidado(data(Ano,4,5),3,12,'Baixa','Branqueamento',190)) :- A >= 2013, D =< 2015.
+
+%Imprecisão na idade de um utente, mas sabendo que é aproximadamente 50
+excecao(utente(19,'Carmo',Idd,'Rua dos Pinheiros')) :- aproximadamente(Idd,50).
+
+aproximadamente(X,Y) :- W is 0.25 * Y, Z is 0.75 * Y, X >= W, X =< Z.
+
+
+% -------------------------------------------------------------------------------------------------
+%   Conhecimento Interdito
+% -------------------------------------------------------------------------------------------------
+%valor nulo desconhecido e não é permitida a especificação do mesmo
+
+%Impossibilidade de saber uma certa prioridade
+
+nulo(prioridade_interdita).
+
+cuidado('2018-4-5',10,9,prioridade_interdita,'AVC',20).
+cuidado('2017-2-3',2,8,prioridade_interdita,'Arritmias',11).
++cuidado(Data,Idu,Idp,Prio,Desc,Custo) :: solucoes((Data,Idu,Idp,Prio,Desc,Custo), (cuidado('2018-4-5',10,9,prioridade_interdita,'AVC',20), 
+																					nao(nulo(prioridade_interdita))), R), comprimento(R,N), N==0.
+
++cuidado(Data,Idu,Idp,Prio,Desc,Custo) :: solucoes((Data,Idu,Idp,Prio,Desc,Custo), (cuidado('2017-2-3',2,8,prioridade_interdita,'Arritmias',11), 
+																					nao(nulo(prioridade_interdita))), R), comprimento(R,N), N==0.
+
+excecao(cuidado(D,Idu,Idp,P,Desc,C)) :- cuidado(D,Idu,Idp,prioridade_interdita,Desc,C).	
+
+
+% -------------------------------------------------------------------------------------------------
 %Extensão do predicado comprimento: Lista, Resultado -> {V,F}
 comprimento([],0).
 comprimento([X|Y],R):- comprimento(Y,Z), 
@@ -140,8 +213,30 @@ solucoes(Q,T,S):- findall(Q,T,S).
 concat([], Y, Y).
 concat([X|Y], Z, [X|L]) :- concat(Y,Z,L).
 
+%Extensão do predicado nao: Questao -> {V,F}
+nao(Q) :- Q,!,fail.
+nao(Q).
+
+%Extensão do predicado demo: Questao, Resposta -> {V,F}
+demo(Q,verdadeiro) :- Q.
+demo(Q,falso) :- -Q.
+demo(Q,desconhecido) :- nao(Q), nao(-Q).
+
+%Extensão do predicado demoComp: ListaQuestoes, Resposta({V,F,D}) -> {V,F}
+demoComp((Q1,Q2),R) :- demo(Q1,R1), demoComp(Q2,R2), conjuncao(R1,R2,R).
+
+%Extensão do predicado conjunção: VV1, VV2, Resultado -> {V,F,D}
+conjuncao().
+
+
+
 % -------------------------------------------------------------------------------------------
-% Invariantes
+% -------------------------------------------------------------------------------------------
+%                            INVARIANTES
+% -------------------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------------------
+
+
 % Invariante Estrutural:  nao permitir a insercao de conhecimento
 %                         repetido para o utente
 
@@ -177,6 +272,17 @@ concat([X|Y], Z, [X|L]) :- concat(Y,Z,L).
 -cuidado(Data,IdU,IdPrest,Prio,Desc,Custo) :: (solucoes((Data,IdU,IdPrest,Prio,Desc,Custo), cuidado(Data,IdU,IdPrest,Prio,Desc,Custo), L), comprimento(L,R), R==1).
 
 -inst(Id,N,C) :: (solucoes(Id, inst(Id,N,C), L), comprimento(L,R), R ==1).
+
+%Invariante relativo aos campos da data.
++data(D,M,A) :: (D > 0 ; D <= 31 ; M > 0 ; M =< 12 ; A >= 1900). 
+
+
+% -------------------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------------------
+%       	REQUISITOS
+% -------------------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------------------
+
 
 % 1-------------------------------------------------------------
 % Registar utentes, prestadores, cuidados e instituições
