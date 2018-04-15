@@ -7,25 +7,33 @@
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % SICStus PROLOG: Declaracoes iniciais
 
+:-style_check(-discontiguous).
 :-set_prolog_flag(discontiguous_warnings,off).
 :-set_prolog_flag(single_var_warnings,off).
-:-set_prolog_flag(unknown,fail).
+%:-set_prolog_flag(unknown,fail).
+:- discontiguous (::)/2.
+:- discontiguous excecao/1.
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Definição de invariante
 
 :-op(900,xfy,'::').
+:-op(400,yfx,'$$'). %operador da conjunção 
+:-op(400,yfx,'//'). %operador da disjunção ---- VERIFICAR TODOS
+:-op(700,xfx,'equals'). %operador de igualdade
 
 %-------------------------------------------------------------------------------------------
 % BASE DE CONHECIMENTO
 %-------------------------------------------------------------------------------------------
-% Base de conhecimento com informação dos utentes, prestadores e cuidados
+% Meta predicados.
 
 :- dynamic utente/4.
 :- dynamic prestador/4.
 :- dynamic cuidado/6.
 :- dynamic inst/3.
 :- dynamic data/3.
+:- dynamic (-)/1.
+:- dynamic excecao/1.
 
 %-------------------------------------------------------------------------------------------
 %Extensão do predicado utente: IdUT, Nome, Idade, Morada -> {V,F}
@@ -45,6 +53,8 @@ utente(12,'Sergio',26,'Rua dos Limoes').
 utente(13,'Lucifer',14,'Rua do Palacio').
 utente(14,'Miguel',49,'Rua do Pinheiro').
 utente(15,'Joana',70,'Rua da Maria').
+
+
 % -------------------------------------------------------------------------------------------
 %Extensão do predicado prestador: IdPrest, Nome, Especialidade, IdInstituição -> {V,F}
 
@@ -105,6 +115,33 @@ inst(5,'Hospital dos Bonecos','Lisboa').
 data().
 
 
+
+% ------------------------------------------------------------------------------------------------
+%   Sistema de Inferência
+% ------------------------------------------------------------------------------------------------
+
+
+equals(verdadeiro,$$(verdadeiro,verdadeiro)).
+equals(falso,$$(falso,verdadeiro)).
+equals(falso,$$(verdadeiro,falso)).
+equals(falso,$$(falso,falso)).
+equals(desconhecido,$$(desconhecido,desconhecido)).
+equals(desconhecido,$$(desconhecido,verdadeiro)).
+equals(desconhecido,$$(verdadeiro,desconhecido)).
+equals(desconhecido,$$(desconhecido,falso)).
+equals(desconhecido,$$(falso,desconhecido)).
+
+equals(verdadeiro,//(verdadeiro,verdadeiro)).
+equals(verdadeiro,//(verdadeiro,falso)).
+equals(verdadeiro,//(falso,verdadeiro)).
+equals(falso,//(falso,falso)).
+equals(desconhecido,//(desconhecido,desconhecido)).
+equals(desconhecido,//(desconhecido,verdadeiro)).
+equals(desconhecido,//(verdadeiro,desconhecido)).
+equals(desconhecido,//(desconhecido,falso)).
+equals(desconhecido,//(falso,desconhecido)).
+
+
 % ------------------------------------------------------------------------------------------------
 %   Conhecimento Incerto
 % ------------------------------------------------------------------------------------------------
@@ -114,14 +151,14 @@ data().
 utente(16,'Joaquina',57,morada_desconhecida).
 utente(17,'Quim',38,morada_desconhecida).
 
-excecao(utente(Idu,N,Idd,M)) :- utente(Idu,N,Idd,morada_desconhecida).
+excecao(utente(Idu,N,Idd,_)) :- utente(Idu,N,Idd,morada_desconhecida).
 
 
 %Desconhecimento da idade de um utente mas sabendo que não é 20 anos
 utente(18,'Jonas',idade_desconhecida,'Rua de Cristal').
 -utente(18,'Jonas',20,'Rua de Cristal').
 
-excecao(utente(Idu,N,Idd,M)) :- utente(Idu,N,idade_desconhecida,M).	
+excecao(utente(Idu,N,_,M)) :- utente(Idu,N,idade_desconhecida,M).	
 
 
 
@@ -145,12 +182,12 @@ excecao(prestador(21,'Amaral','Optometria',5)).
 excecao(cuidado(data(2018,4,D),6,14,'Alta','Ecografia',30)) :- D >= 1, D =< 30.
 
 %Ano perdido
-excecao(cuidado(data(Ano,4,5),3,12,'Baixa','Branqueamento',190)) :- A >= 2013, D =< 2015.
+excecao(cuidado(data(Ano,4,5),3,12,'Baixa','Branqueamento',190)) :- Ano >= 2013, Ano =< 2015.
 
 %Imprecisão na idade de um utente, mas sabendo que é aproximadamente 50
 excecao(utente(19,'Carmo',Idd,'Rua dos Pinheiros')) :- aproximadamente(Idd,50).
 
-aproximadamente(X,Y) :- W is 0.25 * Y, Z is 0.75 * Y, X >= W, X =< Z.
+aproximadamente(X,Y) :- W is 0.85 * Y, Z is 1.15 * Y, X >= W, X =< Z.
 
 
 % -------------------------------------------------------------------------------------------------
@@ -164,13 +201,13 @@ nulo(prioridade_interdita).
 
 cuidado('2018-4-5',10,9,prioridade_interdita,'AVC',20).
 cuidado('2017-2-3',2,8,prioridade_interdita,'Arritmias',11).
-+cuidado(Data,Idu,Idp,Prio,Desc,Custo) :: solucoes((Data,Idu,Idp,Prio,Desc,Custo), (cuidado('2018-4-5',10,9,prioridade_interdita,'AVC',20), 
-																					nao(nulo(prioridade_interdita))), R), comprimento(R,N), N==0.
++cuidado(Data,Idu,Idp,Prio,Desc,Custo) :: (solucoes((Data,Idu,Idp,Prio,Desc,Custo), (cuidado('2018-4-5',10,9,prioridade_interdita,'AVC',20), 
+																					nao(nulo(prioridade_interdita))), R), comprimento(R,N), N==0).
 
-+cuidado(Data,Idu,Idp,Prio,Desc,Custo) :: solucoes((Data,Idu,Idp,Prio,Desc,Custo), (cuidado('2017-2-3',2,8,prioridade_interdita,'Arritmias',11), 
-																					nao(nulo(prioridade_interdita))), R), comprimento(R,N), N==0.
++cuidado(Data,Idu,Idp,Prio,Desc,Custo) :: (solucoes((Data,Idu,Idp,Prio,Desc,Custo), (cuidado('2017-2-3',2,8,prioridade_interdita,'Arritmias',11), 
+																					nao(nulo(prioridade_interdita))), R), comprimento(R,N), N==0).
 
-excecao(cuidado(D,Idu,Idp,P,Desc,C)) :- cuidado(D,Idu,Idp,prioridade_interdita,Desc,C).	
+excecao(cuidado(D,Idu,Idp,_,Desc,C)) :- cuidado(D,Idu,Idp,prioridade_interdita,Desc,C).
 
 
 % -------------------------------------------------------------------------------------------------
@@ -222,11 +259,20 @@ demo(Q,verdadeiro) :- Q.
 demo(Q,falso) :- -Q.
 demo(Q,desconhecido) :- nao(Q), nao(-Q).
 
-%Extensão do predicado demoComp: ListaQuestoes, Resposta({V,F,D}) -> {V,F}
-demoComp((Q1,Q2),R) :- demo(Q1,R1), demoComp(Q2,R2), conjuncao(R1,R2,R).
+%Extensão do predicado demoConj: ListaQuestoes, Resposta({V,F,D}) -> {V,F}
+demoConj([],verdadeiro).
+demoConj([X],R) :- demo(X,R).
+demoConj([Q1|Q2],R) :- demo(Q1,R1), demoConj(Q2,R2), conjuncao(R1,R2,R).
+
+%Extensão do predicado demoConj: ListaQuestoes, Resposta({V,F,D}) -> {V,F}
+demoDisj([],falso).
+demoDisj([X],R) :- demo(X,R).
+demoDisj([Q1|Q2],R) :- demo(Q1,R1), demoDisj(Q2,R2), disjuncao(R1,R2,R).
 
 %Extensão do predicado conjunção: VV1, VV2, Resultado -> {V,F,D}
-conjuncao().
+conjuncao(X,Y,R) :- R equals X$$Y.
+
+disjuncao(X,Y,R) :- R equals X//Y.
 
 
 
@@ -272,9 +318,6 @@ conjuncao().
 -cuidado(Data,IdU,IdPrest,Prio,Desc,Custo) :: (solucoes((Data,IdU,IdPrest,Prio,Desc,Custo), cuidado(Data,IdU,IdPrest,Prio,Desc,Custo), L), comprimento(L,R), R==1).
 
 -inst(Id,N,C) :: (solucoes(Id, inst(Id,N,C), L), comprimento(L,R), R ==1).
-
-%Invariante relativo aos campos da data.
-+data(D,M,A) :: (D > 0 ; D <= 31 ; M > 0 ; M =< 12 ; A >= 1900). 
 
 
 % -------------------------------------------------------------------------------------------
