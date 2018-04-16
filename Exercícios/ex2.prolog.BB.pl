@@ -81,25 +81,25 @@ prestador(20,'David','Oncologia',5).
 
 
 % -------------------------------------------------------------------------------------------
-%Extensão do predicado cuidado: Data, IdUt, IdPrest, Prioridade, Descrição, Custo -> {V,F}
+%Extensão do predicado cuidado: IdData, IdUt, IdPrest, Prioridade, Descrição, Custo -> {V,F}
 
-cuidado('2018-1-1',1,1,'Media','Amigdalite',10).
-cuidado('2018-1-1',2,1,'Alta','Carie',26).
-cuidado('2018-1-1',3,3,'Baixa','Acne',15).
-cuidado('2018-1-2',4,4,'Alta','Cancro',32).
-cuidado('2018-1-2',5,5,'Media','Fratura do pulso',19).
-cuidado('2018-1-3',4,6,'Baixa','Papa Nicolau', 100).
-cuidado('2018-1-3',7,20,'Alta','Cancro da Mama',20).
-cuidado('2018-1-3',8,19,'Alta','Enfarte',198).
-cuidado('2018-1-4',9,18,'Baixa','Tirar Raio-X',3).
-cuidado('2018-1-4',10,17,'Media','Unha encravada',37).
-cuidado('2018-1-5',11,16,'Baixa','Plano Alimentar',12).
-cuidado('2018-2-5',12,15,'Media','Consulta rotina',90).
-cuidado('2018-2-6',13,14,'Media','Ecografia aos ovarios',58).
-cuidado('2018-2-6',14,13,'Alta','Urticaria',5).
-cuidado('2018-2-7',15,12,'Baixa','Por aparelho',2000).
-cuidado('2018-1-2',5,5,'Alta','Fratura exposta na perna',18).
-cuidado('2018-3-5',8,18,'Raio-X ao coração',400).
+cuidado(1,'Media','Amigdalite',10).
+cuidado(2,2,1,'Alta','Carie',26).
+cuidado(3,3,3,'Baixa','Acne',15).
+cuidado(4,4,4,'Alta','Cancro',32).
+cuidado(5,5,5,'Media','Fratura do pulso',19).
+cuidado(6,4,6,'Baixa','Papa Nicolau', 100).
+cuidado(7,7,20,'Alta','Cancro da Mama',20).
+cuidado(8,8,19,'Alta','Enfarte',198).
+cuidado(9,9,18,'Baixa','Tirar Raio-X',3).
+cuidado(10,10,17,'Media','Unha encravada',37).
+cuidado(11,11,16,'Baixa','Plano Alimentar',12).
+cuidado(12,12,15,'Media','Consulta rotina',90).
+cuidado(13,13,14,'Media','Ecografia aos ovarios',58).
+cuidado(14,14,13,'Alta','Urticaria',5).
+cuidado(15,15,12,'Baixa','Por aparelho',2000).
+cuidado(16,5,5,'Alta','Fratura exposta na perna',18).
+cuidado(17,8,18,'Raio-X ao coração',400).
 
 % -------------------------------------------------------------------------------------------
 %Extensão do predicado instituição: IdInst, Nome, Cidade -> {V,F}
@@ -111,10 +111,24 @@ inst(5,'Hospital dos Bonecos','Lisboa').
 
 
 % -------------------------------------------------------------------------------------------
-%Extensão do predicado instituição: IdInst, Nome, Cidade -> {V,F}
-data().
-
-
+%Extensão do predicado data: IdData, Ano, Mês, Dia -> {V,F}
+data(1,2018,1,1).
+data(2,2018,1,1).
+data(3,2018,1,1).
+data(4,2018,1,2).
+data(5,2018,1,2).
+data(6,2018,1,3).
+data(7,2018,1,3).
+data(8,2018,1,3).
+data(9,2018,1,4).
+data(10,2018,1,4).
+data(11,2018,1,5).
+data(12,2018,2,5).
+data(13,2018,2,6).
+data(14,2018,2,6).
+data(15,2018,2,7).
+data(16,2018,1,2).
+data(17,2018,3,5).
 
 % ------------------------------------------------------------------------------------------------
 %   Sistema de Inferência
@@ -179,10 +193,11 @@ excecao(prestador(21,'Amaral','Optometria',5)).
 %das datas dos cuidados de saúde
 
 %Dia perdido --- DEPOIS VERIFICAR SE TEM QUE TER ALGUM IGUAL EM CIMA NOS CUIDADOS
-excecao(cuidado(data(2018,4,D),6,14,'Alta','Ecografia',30)) :- D >= 1, D =< 30.
+
+excecao(cuidado(data(18,2018,4,D),6,14,'Alta','Ecografia',30)) :- D >= 1, D =< 30.
 
 %Ano perdido
-excecao(cuidado(data(Ano,4,5),3,12,'Baixa','Branqueamento',190)) :- Ano >= 2013, Ano =< 2015.
+excecao(cuidado(data(19,Ano,4,5),3,12,'Baixa','Branqueamento',190)) :- Ano >= 2013, Ano =< 2015.
 
 %Imprecisão na idade de um utente, mas sabendo que é aproximadamente 50
 excecao(utente(19,'Carmo',Idd,'Rua dos Pinheiros')) :- aproximadamente(Idd,50).
@@ -198,6 +213,9 @@ aproximadamente(X,Y) :- W is 0.85 * Y, Z is 1.15 * Y, X >= W, X =< Z.
 %Impossibilidade de saber uma certa prioridade
 
 nulo(prioridade_interdita).
+nulo(idade_interdita).
+nulo(morada_interdita).
+nulo(nome_interdito).
 
 cuidado('2018-4-5',10,9,prioridade_interdita,'AVC',20).
 cuidado('2017-2-3',2,8,prioridade_interdita,'Arritmias',11).
@@ -208,6 +226,44 @@ cuidado('2017-2-3',2,8,prioridade_interdita,'Arritmias',11).
 																					nao(nulo(prioridade_interdita))), R), comprimento(R,N), N==0).
 
 excecao(cuidado(D,Idu,Idp,_,Desc,C)) :- cuidado(D,Idu,Idp,prioridade_interdita,Desc,C).
+
+
+%Impossibilidade de saber uma certa idade
+utente(20,'Tina',idade_interdita,'Rua do Chiado').
++utente(Idu,N,Idd,M) :: (solucoes((Idu,N,Idd,M), (utente(Idu,N,idade_interdita,'Rua do Chiado'), 
+												 nao(nulo(idade_interdita))),R), comprimento(R,N),N==0).
+
+%Impossibilidade de saber uma certa morada
+utente(21,'Mino',37,morada_interdita).
++utente(Idu,N,Idd,M) :: (solucoes((Idu,N,Idd,M), (utente(Idu,N,Idd,morada_interdita), 
+												 nao(nulo(morada_interdita))),R), comprimento(R,N),N==0).
+
+%O senhor X entrou de urgência no Hospital S.Joao com suspeita de ter sido envenenado.
+%Após investigação, sabe-se que X é um espião russo, então os seus dados são interditos para preservar a sua identidade.
+%No entanto, após contacto, apareceu o agente especial K para este preencher os dados do espião 
+%e tornar o conhecimento desconhecido em conhecimento perfeito
+utente(22,nome_interdito,idade_interdita,morada_interdita).
++utente(Idu,N,Idd,M) :: (solucoes((Idu,N,Idd,M), (utente(Idu,nome_interdito,idade_interdita,morada_interdita),
+												 nao(nulo(nome_interdito)),nao(nulo(idade_interdita)),nao(nulo(morada_interdita))),R),
+												 comprimento(R,N), N == 0).
+
+preenche_utente_todos(Id,Nome,Idade,Morada) :- preencher_utente_nome(Id,Nome), preencher_utente_idade(Id,Idade), preencher_utente_morada(Id,Morada).
+
+%-------Transformar conhecimento desconhecido em conhecimento perfeito-------------
+
+%Utente
+preencher_utente_nome(Idu,Nome) :- utenteID(Idu,utente(I,N,Id,Mo)), 
+										   atom(N), nao(atom(Nome)), 
+										   troca(utente(I,N,Idd,M), utente(I,Nome,Idd,M)).
+
+
+preencher_utente_idade(Idu,Idd) :- utenteID(Idu,utente(I,N,Id,Mo)), 
+										   atom(Id), nao(atom(Idd)), 
+										   troca(utente(I,N,Id,M), utente(I,Nome,Idd,M)).
+
+preencher_utente_morada(Idu,M) :- utenteID(Idu,utente(I,N,Id,Mo)), 
+										   atom(Mo), nao(atom(M)), 
+										   troca(utente(I,N,Idd,Mo), utente(I,Nome,Idd,M)).
 
 
 % -------------------------------------------------------------------------------------------------
@@ -274,6 +330,9 @@ conjuncao(X,Y,R) :- R equals X$$Y.
 
 disjuncao(X,Y,R) :- R equals X//Y.
 
+%Extensão do predicado troca: Antigo, Recente -> {V,F}
+troca(A,R) :- remove(A), evolucao(R).
+troca(A,_) :- assert(A), !, fail.
 
 
 % -------------------------------------------------------------------------------------------
