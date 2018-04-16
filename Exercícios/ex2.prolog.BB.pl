@@ -175,6 +175,18 @@ utente(18,'Jonas',idade_desconhecida,'Rua de Cristal').
 excecao(utente(Idu,N,_,M)) :- utente(Idu,N,idade_desconhecida,M).	
 
 
+%O senhor X entrou de urgência no Hospital S.Joao com suspeita de ter sido envenenado.
+%Após investigação, sabe-se que X é um espião russo, então os seus dados são interditos para preservar a sua identidade.
+%No entanto, após contacto, apareceu o agente especial K para este preencher os dados do espião 
+%e tornar o conhecimento desconhecido em conhecimento perfeito
+utente(22,nome_interdito,idade_interdita,morada_interdita).
++utente(Idu,Nome,Idd,M) :: (solucoes((Idu,Nome,Idd,M), (utente(Idu,nome_interdito,idade_interdita,morada_interdita),
+												 nao(nulo(nome_interdito)),nao(nulo(idade_interdita)),nao(nulo(morada_interdita))),R),
+												 comprimento(R,N), N == 0).
+
+%preenche_utente_todos(Id,Nome,Idade,Morada) :- preencher_utente_nome(Id,Nome), %---- VERIFICAAAAAAAAAAR ------
+%											   preencher_utente_idade(Id,Idade), 
+%											   preencher_utente_morada(Id,Morada).
 
 % -------------------------------------------------------------------------------------------------
 %   Conhecimento Impreciso
@@ -230,40 +242,32 @@ excecao(cuidado(D,Idu,Idp,_,Desc,C)) :- cuidado(D,Idu,Idp,prioridade_interdita,D
 
 %Impossibilidade de saber uma certa idade
 utente(20,'Tina',idade_interdita,'Rua do Chiado').
-+utente(Idu,N,Idd,M) :: (solucoes((Idu,N,Idd,M), (utente(Idu,N,idade_interdita,'Rua do Chiado'), 
++utente(Idu,Nome,Idd,M) :: (solucoes((Idu,Nome,Idd,M), (utente(Idu,Nome,idade_interdita,'Rua do Chiado'), 
 												 nao(nulo(idade_interdita))),R), comprimento(R,N),N==0).
 
 %Impossibilidade de saber uma certa morada
 utente(21,'Mino',37,morada_interdita).
-+utente(Idu,N,Idd,M) :: (solucoes((Idu,N,Idd,M), (utente(Idu,N,Idd,morada_interdita), 
++utente(Idu,Nome,Idd,M) :: (solucoes((Idu,Nome,Idd,M), (utente(Idu,Nome,Idd,morada_interdita), 
 												 nao(nulo(morada_interdita))),R), comprimento(R,N),N==0).
 
-%O senhor X entrou de urgência no Hospital S.Joao com suspeita de ter sido envenenado.
-%Após investigação, sabe-se que X é um espião russo, então os seus dados são interditos para preservar a sua identidade.
-%No entanto, após contacto, apareceu o agente especial K para este preencher os dados do espião 
-%e tornar o conhecimento desconhecido em conhecimento perfeito
-utente(22,nome_interdito,idade_interdita,morada_interdita).
-+utente(Idu,N,Idd,M) :: (solucoes((Idu,N,Idd,M), (utente(Idu,nome_interdito,idade_interdita,morada_interdita),
-												 nao(nulo(nome_interdito)),nao(nulo(idade_interdita)),nao(nulo(morada_interdita))),R),
-												 comprimento(R,N), N == 0).
 
-preenche_utente_todos(Id,Nome,Idade,Morada) :- preencher_utente_nome(Id,Nome), preencher_utente_idade(Id,Idade), preencher_utente_morada(Id,Morada).
 
 %-------Transformar conhecimento desconhecido em conhecimento perfeito-------------
 
 %Utente
-preencher_utente_nome(Idu,Nome) :- utenteID(Idu,utente(I,N,Id,Mo)), 
-										   atom(N), nao(atom(Nome)), 
-										   troca(utente(I,N,Idd,M), utente(I,Nome,Idd,M)).
+%preencher_utente_nome(Idu,Nome) :- utenteID(Idu,utente(Idu,N,Id,Mo)), 
+%										   atom(N), nao(atom(Nome)), 
+%										   troca(utente(Idu,N,Id,Mo), utente(Idu,Nome,Id,Mo)).
 
 
-preencher_utente_idade(Idu,Idd) :- utenteID(Idu,utente(I,N,Id,Mo)), 
-										   atom(Id), nao(atom(Idd)), 
-										   troca(utente(I,N,Id,M), utente(I,Nome,Idd,M)).
+%preencher_utente(idade, Id, Idade)
+%   :- utenteID(Id, utente(Id, N, S, M)),
+%       atom(S), nao( atom(Idade) ),
+%       troca(utente(Id, N, S, M), utente(Id, N, Idade, M)).
 
-preencher_utente_morada(Idu,M) :- utenteID(Idu,utente(I,N,Id,Mo)), 
-										   atom(Mo), nao(atom(M)), 
-										   troca(utente(I,N,Idd,Mo), utente(I,Nome,Idd,M)).
+%preencher_utente_morada(Idu,M) :- utenteID(Idu,utente(I,N,Id,Mo)), 
+%										   atom(Mo), nao(atom(M)), 
+%										   troca(utente(I,N,Idd,Mo), utente(I,Nome,Idd,M)).
 
 
 % -------------------------------------------------------------------------------------------------
@@ -678,10 +682,5 @@ cuidados_prio(Prio,R) :- solucoes(cuidado(D,Idu,Idp,Prio,Desc,C), cuidado(D,Idu,
 % nr_cuidado_prio: Prioridade, ListaResultado -> {V,F}
 
 nr_cuidado_prio(Prio,R) :- solucoes(cuidado(D,Idu,Idp,Prio,Desc,C), cuidado(D,Idu,Idp,Prio,Desc,C), R1), comprimento(R1,R).
-
-
-
-
-
 
 
