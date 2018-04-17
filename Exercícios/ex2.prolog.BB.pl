@@ -54,8 +54,10 @@ utente(13,'Lucifer',14,'Rua do Palacio').
 utente(14,'Miguel',49,'Rua do Pinheiro').
 utente(15,'Joana',70,'Rua da Maria').
 
+-utente(Idu,Nome,Idade,Morada):- nao(utente(Idu,Nome,Idade,Morada)),
+     							 nao(excecao(utente(Idu,Nome,Idade,Morada))).
 
-% -------------------------------------------------------------------------------------------
+% --------------------------------------------------------------------------------------------------------------------
 %Extensão do predicado prestador: IdPrest, Nome, Especialidade, IdInstituição -> {V,F}
 
 prestador(1,'Ze','Otorrino',1). 
@@ -79,8 +81,10 @@ prestador(18,'Nuno','Radiologia',2).
 prestador(19,'Marta','Cardiologia',4).
 prestador(20,'David','Oncologia',5).
 
+-prestador(Idp,Nome,Esp,IdInst) :- nao(prestador(Idp,Nome,Esp,IdInst)), 
+								   nao(excecao(prestador(Idp,Nome,Esp,IdInst))).
 
-% -------------------------------------------------------------------------------------------
+% --------------------------------------------------------------------------------------------------------------------
 %Extensão do predicado cuidado: IdData, IdUt, IdPrest, Prioridade, Descrição, Custo -> {V,F}
 
 cuidado(1,'Media','Amigdalite',10).
@@ -101,6 +105,8 @@ cuidado(15,15,12,'Baixa','Por aparelho',2000).
 cuidado(16,5,5,'Alta','Fratura exposta na perna',18).
 cuidado(17,8,18,'Raio-X ao coração',400).
 
+-cuidado(IdData,Idu,Idp,Prio,Desc,Custo) :- nao(cuidado(IdData,Idu,Idp,Prio,Desc,Custo)), 
+											nao(excecao(cuidado(IdData,Idu,Idp,Prio,Desc,Custo))).
 % -------------------------------------------------------------------------------------------
 %Extensão do predicado instituição: IdInst, Nome, Cidade -> {V,F}
 inst(1,'Hospital Privado de Braga', 'Braga').
@@ -109,6 +115,7 @@ inst(3,'Hospital S.Joao','Porto').
 inst(4,'Hospital de Felgueiras','Felgueiras').
 inst(5,'Hospital dos Bonecos','Lisboa').
 
+-inst(Idi,N,Cid) :- nao(inst(Idi,N,Cid)), nao(excecao(inst(Idi,N,Cid))).
 
 % -------------------------------------------------------------------------------------------
 %Extensão do predicado data: IdData, Ano, Mês, Dia -> {V,F}
@@ -167,6 +174,7 @@ utente(17,'Quim',38,morada_desconhecida).
 
 excecao(utente(Idu,N,Idd,_)) :- utente(Idu,N,Idd,morada_desconhecida).
 
++utente(Idu, _, _, Morada) :: (solucoes(Morada, (utente(Idu, _, _, Morada), nao(nulo(Morada))), R), comprimento(R,N), N == 0).
 
 %Desconhecimento da idade de um utente mas sabendo que não é 20 anos
 utente(18,'Jonas',idade_desconhecida,'Rua de Cristal').
@@ -174,19 +182,6 @@ utente(18,'Jonas',idade_desconhecida,'Rua de Cristal').
 
 excecao(utente(Idu,N,_,M)) :- utente(Idu,N,idade_desconhecida,M).	
 
-
-%O senhor X entrou de urgência no Hospital S.Joao com suspeita de ter sido envenenado.
-%Após investigação, sabe-se que X é um espião russo, então os seus dados são interditos para preservar a sua identidade.
-%No entanto, após contacto, apareceu o agente especial K para este preencher os dados do espião 
-%e tornar o conhecimento desconhecido em conhecimento perfeito
-utente(22,nome_interdito,idade_interdita,morada_interdita).
-+utente(Idu,Nome,Idd,M) :: (solucoes((Idu,Nome,Idd,M), (utente(Idu,nome_interdito,idade_interdita,morada_interdita),
-												 nao(nulo(nome_interdito)),nao(nulo(idade_interdita)),nao(nulo(morada_interdita))),R),
-												 comprimento(R,N), N == 0).
-
-%preenche_utente_todos(Id,Nome,Idade,Morada) :- preencher_utente_nome(Id,Nome), %---- VERIFICAAAAAAAAAAR ------
-%											   preencher_utente_idade(Id,Idade), 
-%											   preencher_utente_morada(Id,Morada).
 
 % -------------------------------------------------------------------------------------------------
 %   Conhecimento Impreciso
@@ -196,7 +191,7 @@ utente(22,nome_interdito,idade_interdita,morada_interdita).
 
 %O prestador Amaral trabalha em três instituições diferentes
 %O cuidado do deste prestador pode ter sido efetuado em qualquer uma das instituições.
-
+prestador(21,'Amaral','Optometria',inst_desconhecida).
 excecao(prestador(21,'Amaral','Optometria',1)).
 excecao(prestador(21,'Amaral','Optometria',3)).
 excecao(prestador(21,'Amaral','Optometria',5)).
@@ -205,13 +200,15 @@ excecao(prestador(21,'Amaral','Optometria',5)).
 %das datas dos cuidados de saúde
 
 %Dia perdido --- DEPOIS VERIFICAR SE TEM QUE TER ALGUM IGUAL EM CIMA NOS CUIDADOS
-
+cuidado(data(18,2017,3,dia_desconhecido),6,14,'Alta','Ecografia',30).
 excecao(cuidado(data(18,2018,4,D),6,14,'Alta','Ecografia',30)) :- D >= 1, D =< 30.
 
 %Ano perdido
+cuidado(data(19,ano_desconhecido,4,5),3,12,'Baixa','Branqueamento',190).
 excecao(cuidado(data(19,Ano,4,5),3,12,'Baixa','Branqueamento',190)) :- Ano >= 2013, Ano =< 2015.
 
 %Imprecisão na idade de um utente, mas sabendo que é aproximadamente 50
+utente(19,'Carmo',idade_desconhecida,'Rua dos Pinheiros').
 excecao(utente(19,'Carmo',Idd,'Rua dos Pinheiros')) :- aproximadamente(Idd,50).
 
 aproximadamente(X,Y) :- W is 0.85 * Y, Z is 1.15 * Y, X >= W, X =< Z.
@@ -229,8 +226,9 @@ nulo(idade_interdita).
 nulo(morada_interdita).
 nulo(nome_interdito).
 
-cuidado('2018-4-5',10,9,prioridade_interdita,'AVC',20).
-cuidado('2017-2-3',2,8,prioridade_interdita,'Arritmias',11).
+cuidado(20,10,9,prioridade_interdita,'AVC',20).
+cuidado(21,2,8,prioridade_interdita,'Arritmias',11).
+
 +cuidado(Data,Idu,Idp,Prio,Desc,Custo) :: (solucoes((Data,Idu,Idp,Prio,Desc,Custo), (cuidado('2018-4-5',10,9,prioridade_interdita,'AVC',20), 
 																					nao(nulo(prioridade_interdita))), R), comprimento(R,N), N==0).
 
@@ -242,33 +240,11 @@ excecao(cuidado(D,Idu,Idp,_,Desc,C)) :- cuidado(D,Idu,Idp,prioridade_interdita,D
 
 %Impossibilidade de saber uma certa idade
 utente(20,'Tina',idade_interdita,'Rua do Chiado').
+
+excecao(utente(Id,Nome,_,M)) :- utente(Id,Nome,_,M).
+
 +utente(Idu,Nome,Idd,M) :: (solucoes((Idu,Nome,Idd,M), (utente(Idu,Nome,idade_interdita,'Rua do Chiado'), 
 												 nao(nulo(idade_interdita))),R), comprimento(R,N),N==0).
-
-%Impossibilidade de saber uma certa morada
-utente(21,'Mino',37,morada_interdita).
-+utente(Idu,Nome,Idd,M) :: (solucoes((Idu,Nome,Idd,M), (utente(Idu,Nome,Idd,morada_interdita), 
-												 nao(nulo(morada_interdita))),R), comprimento(R,N),N==0).
-
-
-
-%-------Transformar conhecimento desconhecido em conhecimento perfeito-------------
-
-%Utente
-%preencher_utente_nome(Idu,Nome) :- utenteID(Idu,utente(Idu,N,Id,Mo)), 
-%										   atom(N), nao(atom(Nome)), 
-%										   troca(utente(Idu,N,Id,Mo), utente(Idu,Nome,Id,Mo)).
-
-
-%preencher_utente(idade, Id, Idade)
-%   :- utenteID(Id, utente(Id, N, S, M)),
-%       atom(S), nao( atom(Idade) ),
-%       troca(utente(Id, N, S, M), utente(Id, N, Idade, M)).
-
-%preencher_utente_morada(Idu,M) :- utenteID(Idu,utente(I,N,Id,Mo)), 
-%										   atom(Mo), nao(atom(M)), 
-%										   troca(utente(I,N,Idd,Mo), utente(I,Nome,Idd,M)).
-
 
 % -------------------------------------------------------------------------------------------------
 %Extensão do predicado comprimento: Lista, Resultado -> {V,F}
@@ -408,6 +384,10 @@ registaCuidado(D,Idu,Idp,P,Desc,C) :- evolucao(cuidado(D,Idu,Idp,P,Desc,C)).
 
 registaInst(Id,N,C) :- evolucao(inst(Id,N,C)).
 
+% Extensao do predicado registaData: T -> {V,F}
+registaData(Id,Ano,Mes,Dia) :- evolucao(data(Id,Ano,Mes,Dia)).
+
+
 % 2-------------------------------------------------------------
 % Remover utentes, prestadores, cuidados de saúde e instituição;
 
@@ -438,12 +418,15 @@ utenteNome(Nome,R) :- solucoes((ID,Nome,I,M), utente(ID,Nome,I,M), R).
 utenteIdade(Idade,R) :- solucoes((ID,N,Idade,M),utente(ID,N,Idade,M),R).
 utenteMor(M,R) :- solucoes((ID,N,I,M),utente(ID,N,I,M),R).
 
+
 % 4-----------------------------------------------------------------------
 % Identificar instituições prestadoras de cuidados de saúde
 % inst_cuidados: ListaResultado -> {V,F}
 
 inst_cuidados(R1) :- solucoes(inst(Id,N,C), (inst(Id,N,C), prestador(Idp,_,_,Id), cuidado(_,Idp,_,_,_,_)), R),
 					apagaRep(R,R1).
+
+-inst(Idi,N,Cid) :- nao(inst(Idi,N,Cid)), nao(excecao(inst(Idi,N,Cid))).
 
 % Extensao do predicado que apaga todas ocorrencias de 1 elemento numa lista
 % apaga1: Elemento, Lista, ListaResultado -> {V,F}
