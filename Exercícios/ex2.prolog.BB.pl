@@ -180,20 +180,6 @@ utente(18,"Jonas",idade_desconhecida,"Rua de Cristal").
 
 excecao(utente(Idu,N,_,M)) :- utente(Idu,N,idade_desconhecida,M).	
 
-
-%O senhor X entrou de urgência no Hospital S.Joao com suspeita de ter sido envenenado.
-%Após investigação, sabe-se que X é um espião russo, então os seus dados são interditos para preservar a sua identidade.
-%No entanto, após contacto, apareceu o agente especial K para este preencher os dados do espião 
-%e tornar o conhecimento desconhecido em conhecimento perfeito
-%utente(22,nome_interdito,idade_interdita,morada_interdita).
-%+utente(Idu,Nome,Idd,M) :: (solucoes((Idu,Nome,Idd,M), (utente(Idu,nome_interdito,idade_interdita,morada_interdita),
-%												 nao(nulo(nome_interdito)),nao(nulo(idade_interdita)),nao(nulo(morada_interdita))),R),
-%												 comprimento(R,N), N == 0).
-
-%preenche_utente_todos(Id,Nome,Idade,Morada) :- preencher_utente_nome(Id,Nome), %---- VERIFICAAAAAAAAAAR ------
-%											   preencher_utente_idade(Id,Idade), 
-%											   preencher_utente_morada(Id,Morada).
-
 % -------------------------------------------------------------------------------------------------
 %   Conhecimento Impreciso
 % -------------------------------------------------------------------------------------------------
