@@ -210,11 +210,12 @@ excecao(prestador(21,"Amaral","Optometria",5)).
 %Devido a problemas na base de conhecimento perderam-se alguns parâmetros 
 %das datas dos cuidados de saúde
 
-%Dia perdido --- DEPOIS VERIFICAR SE TEM QUE TER ALGUM IGUAL EM CIMA NOS CUIDADOS
-
+%Dia perdido
+data(18,2018,4,dia_desconhecido).
 excecao(cuidado(data(18,2018,4,D),6,14,"Alta","Ecografia",30)) :- D >= 1, D =< 30.
 
 %Ano perdido
+data(19,ano_desconhecido,4,5).
 excecao(cuidado(data(19,Ano,4,5),3,12,"Baixa","Branqueamento",190)) :- Ano >= 2013, Ano =< 2015.
 
 %Imprecisão na idade de um utente, mas sabendo que é aproximadamente 50
@@ -235,12 +236,12 @@ nulo(idade_interdita).
 nulo(morada_interdita).
 nulo(nome_interdito).
 
-cuidado("2018-4-5",10,9,prioridade_interdita,"AVC",20).
-cuidado("2017-2-3",2,8,prioridade_interdita,"Arritmias",11).
-+cuidado(Data,Idu,Idp,Prio,Desc,Custo) :: (solucoes((Data,Idu,Idp,Prio,Desc,Custo), (cuidado("2018-4-5",10,9,prioridade_interdita,"AVC",20), 
+cuidado(17,10,9,prioridade_interdita,"AVC",20).
+cuidado(17,2,8,prioridade_interdita,"Arritmias",11).
++cuidado(Data,Idu,Idp,Prio,Desc,Custo) :: (solucoes((Data,Idu,Idp,Prio,Desc,Custo), (cuidado(18,10,9,prioridade_interdita,"AVC",20), 
 																					nao(nulo(prioridade_interdita))), R), comprimento(R,N), N==0).
 
-+cuidado(Data,Idu,Idp,Prio,Desc,Custo) :: (solucoes((Data,Idu,Idp,Prio,Desc,Custo), (cuidado("2017-2-3",2,8,prioridade_interdita,"Arritmias",11), 
++cuidado(Data,Idu,Idp,Prio,Desc,Custo) :: (solucoes((Data,Idu,Idp,Prio,Desc,Custo), (cuidado(18,2,8,prioridade_interdita,"Arritmias",11), 
 																					nao(nulo(prioridade_interdita))), R), comprimento(R,N), N==0).
 
 excecao(cuidado(D,Idu,Idp,_,Desc,C)) :- cuidado(D,Idu,Idp,prioridade_interdita,Desc,C).
@@ -260,22 +261,15 @@ utente(21,"Mino",37,morada_interdita).
 
 %-------Transformar conhecimento desconhecido em conhecimento perfeito-------------
 
-%Utente
-%preencher_utente_nome(Idu,Nome) :- utenteID(Idu,utente(Idu,N,Id,Mo)), 
-%										   atom(N), nao(atom(Nome)), 
-%										   troca(utente(Idu,N,Id,Mo), utente(Idu,Nome,Id,Mo)).
-
-
-%preencher_utente(idade, Id, Idade)
-%   :- utenteID(Id, utente(Id, N, S, M)),
-%       atom(S), nao( atom(Idade) ),
-%       troca(utente(Id, N, S, M), utente(Id, N, Idade, M)).
+preencher_utente_idade(Id, Idade):- utenteID(Id, utente(Id, N, S, M)),
+	     			 					   atom(S), nao( atom(Idade) ),
+    								       troca(utente(Id, N, S, M), utente(Id, N, Idade, M)).
 
 preencher_utente_morada(Idu,M) :- utenteID(Idu,utente(I,N,Id,Mo)), 
-										   atom(Mo), nao(atom(M)). 
+										   atom(Mo), nao(atom(M)), 
 										   troca(utente(I,N,Idd,Mo), utente(I,N,Idd,M)).
 
-
+%preencher_prestador_inst(Idp,Inst) :-
 % -------------------------------------------------------------------------------------------------
 %Extensão do predicado comprimento: Lista, Resultado -> {V,F}
 comprimento([],0).
@@ -341,7 +335,7 @@ conjuncao(X,Y,R) :- R equals X$$Y.
 disjuncao(X,Y,R) :- R equals X//Y.
 
 %Extensão do predicado troca: Antigo, Recente -> {V,F}
-troca(A,R) :- remove(A). %evolucao(R).
+troca(A,R) :- remove(A), evolucao(R).
 troca(A,_) :- assert(A), !, fail.
 
 
