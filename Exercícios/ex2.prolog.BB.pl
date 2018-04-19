@@ -31,7 +31,7 @@
 :- dynamic prestador/4.
 :- dynamic cuidado/6.
 :- dynamic inst/3.
-:- dynamic data/3.
+:- dynamic data/4.
 :- dynamic (-)/1.
 :- dynamic excecao/1.
 
@@ -185,10 +185,10 @@ excecao(utente(Idu,N,_,M)) :- utente(Idu,N,idade_desconhecida,M).
 %Após investigação, sabe-se que X é um espião russo, então os seus dados são interditos para preservar a sua identidade.
 %No entanto, após contacto, apareceu o agente especial K para este preencher os dados do espião 
 %e tornar o conhecimento desconhecido em conhecimento perfeito
-utente(22,nome_interdito,idade_interdita,morada_interdita).
-+utente(Idu,Nome,Idd,M) :: (solucoes((Idu,Nome,Idd,M), (utente(Idu,nome_interdito,idade_interdita,morada_interdita),
-												 nao(nulo(nome_interdito)),nao(nulo(idade_interdita)),nao(nulo(morada_interdita))),R),
-												 comprimento(R,N), N == 0).
+%utente(22,nome_interdito,idade_interdita,morada_interdita).
+%+utente(Idu,Nome,Idd,M) :: (solucoes((Idu,Nome,Idd,M), (utente(Idu,nome_interdito,idade_interdita,morada_interdita),
+%												 nao(nulo(nome_interdito)),nao(nulo(idade_interdita)),nao(nulo(morada_interdita))),R),
+%												 comprimento(R,N), N == 0).
 
 %preenche_utente_todos(Id,Nome,Idade,Morada) :- preencher_utente_nome(Id,Nome), %---- VERIFICAAAAAAAAAAR ------
 %											   preencher_utente_idade(Id,Idade), 
@@ -202,7 +202,7 @@ utente(22,nome_interdito,idade_interdita,morada_interdita).
 
 %O prestador Amaral trabalha em três instituições diferentes
 %O cuidado do deste prestador pode ter sido efetuado em qualquer uma das instituições.
-
+prestador(21,"Amaral","Optometria",inst_desconhecida).
 excecao(prestador(21,"Amaral","Optometria",1)).
 excecao(prestador(21,"Amaral","Optometria",3)).
 excecao(prestador(21,"Amaral","Optometria",5)).
@@ -219,10 +219,28 @@ data(19,ano_desconhecido,4,5).
 excecao(cuidado(data(19,Ano,4,5),3,12,"Baixa","Branqueamento",190)) :- Ano >= 2013, Ano =< 2015.
 
 %Imprecisão na idade de um utente, mas sabendo que é aproximadamente 50
+utente(19,"Carmo",idade_desconhecida,"Rua dos Pinheiros").
 excecao(utente(19,"Carmo",Idd,"Rua dos Pinheiros")) :- aproximadamente(Idd,50).
 
 aproximadamente(X,Y) :- W is 0.85 * Y, Z is 1.15 * Y, X >= W, X =< Z.
 
+
+%-------Transformar conhecimento imperfeito em conhecimento perfeito-------------
+
+preencher_utente_idade(Id, Idade):- utenteID(Id, utente(Id, N, S, M)),
+	     			 					   atom(S), nao( atom(Idade) ),
+    								       troca(utente(Id, N, S, M), utente(Id, N, Idade, M)).
+
+preencher_utente_morada(Idu,M) :- utenteID(Idu,utente(I,N,Id,Mo)), 
+										   atom(Mo), nao(atom(M)), 
+										   troca(utente(I,N,Idd,Mo), utente(I,N,Idd,M)).
+
+preencher_prestador_inst(Idp,Inst) :- prestadorID(Idp, prestador(Idp,N,Esp,Ist)),
+									  atom(Ist), nao(atom(Inst)),
+									  troca(prestador(Idp,N,Esp,Ist), prestador(Idp,N,Esp,Inst)).
+
+preencher_Data(IdD,Dia) :- dataID(IdD, data(IdD,Ano,Mes,D)), atom(D), nao(atom(Dia)), 
+						   troca(data(IdD,Ano,Mes,D),data(IdD,Ano,Mes,Dia)).
 
 % -------------------------------------------------------------------------------------------------
 %   Conhecimento Interdito
@@ -258,18 +276,6 @@ utente(21,"Mino",37,morada_interdita).
 												 nao(nulo(morada_interdita))),R), comprimento(R,N),N==0).
 
 
-
-%-------Transformar conhecimento desconhecido em conhecimento perfeito-------------
-
-preencher_utente_idade(Id, Idade):- utenteID(Id, utente(Id, N, S, M)),
-	     			 					   atom(S), nao( atom(Idade) ),
-    								       troca(utente(Id, N, S, M), utente(Id, N, Idade, M)).
-
-preencher_utente_morada(Idu,M) :- utenteID(Idu,utente(I,N,Id,Mo)), 
-										   atom(Mo), nao(atom(M)), 
-										   troca(utente(I,N,Idd,Mo), utente(I,N,Idd,M)).
-
-%preencher_prestador_inst(Idp,Inst) :-
 % -------------------------------------------------------------------------------------------------
 %Extensão do predicado comprimento: Lista, Resultado -> {V,F}
 comprimento([],0).
@@ -692,4 +698,6 @@ cuidados_prio(Prio,R) :- solucoes(cuidado(D,Idu,Idp,Prio,Desc,C), cuidado(D,Idu,
 
 nr_cuidado_prio(Prio,R) :- solucoes(cuidado(D,Idu,Idp,Prio,Desc,C), cuidado(D,Idu,Idp,Prio,Desc,C), R1), comprimento(R1,R).
 
+prestadorID(Idp,R) :- solucoes(prestador(Idp,Nome,Esp,Inst), prestador(Idp,Nome,Esp,Inst), [R|_]).
 
+dataID(IdD,R) :- solucoes(data(IdD,Ano,Mes,Dia), data(IdD,Ano,Mes,Dia), [R|_]).
