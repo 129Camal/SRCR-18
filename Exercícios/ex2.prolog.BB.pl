@@ -80,6 +80,7 @@ prestador(19,"Marta","Cardiologia",4).
 prestador(20,"David","Oncologia",5).
 
 -prestador(Idp,Nome,Esp,Inst) :- nao(prestador(Idp,Nome,Esp,Inst)), nao(excecao(prestador(Idp,Nome,Esp,Inst))).
+
 % -------------------------------------------------------------------------------------------
 %Extensão do predicado cuidado: IdData, IdUt, IdPrest, Prioridade, Descrição, Custo -> {V,F}
 
@@ -101,7 +102,7 @@ cuidado(15,15,12,"Baixa","Por aparelho",2000).
 cuidado(16,5,5,"Alta","Fratura exposta na perna",18).
 cuidado(17,8,18,"Raio-X ao coração",400).
 
--cuidado(Data,Idu,Idp,Prio,Desc,Custo).
+-cuidado(Data,Idu,Idp,Prio,Desc,Custo) :- nao(cuidado(Data,Idu,Idp,Prio,Desc,Custo)), nao(excecao(cuidado(Data,Idu,Idp,Prio,Desc,Custo))).
 
 % -------------------------------------------------------------------------------------------
 %Extensão do predicado instituição: IdInst, Nome, Cidade -> {V,F}
@@ -270,9 +271,9 @@ utente(21,"Mino",37,morada_interdita).
 %       atom(S), nao( atom(Idade) ),
 %       troca(utente(Id, N, S, M), utente(Id, N, Idade, M)).
 
-%preencher_utente_morada(Idu,M) :- utenteID(Idu,utente(I,N,Id,Mo)), 
-%										   atom(Mo), nao(atom(M)), 
-%										   troca(utente(I,N,Idd,Mo), utente(I,Nome,Idd,M)).
+preencher_utente_morada(Idu,M) :- utenteID(Idu,utente(I,N,Id,Mo)), 
+										   atom(Mo), nao(atom(M)). 
+										   troca(utente(I,N,Idd,Mo), utente(I,N,Idd,M)).
 
 
 % -------------------------------------------------------------------------------------------------
@@ -340,7 +341,7 @@ conjuncao(X,Y,R) :- R equals X$$Y.
 disjuncao(X,Y,R) :- R equals X//Y.
 
 %Extensão do predicado troca: Antigo, Recente -> {V,F}
-troca(A,R) :- remove(A), evolucao(R).
+troca(A,R) :- remove(A). %evolucao(R).
 troca(A,_) :- assert(A), !, fail.
 
 
@@ -354,7 +355,7 @@ troca(A,_) :- assert(A), !, fail.
 % Invariante Estrutural:  nao permitir a insercao de conhecimento
 %                         repetido para o utente
 
-+utente(Id,Nome,Idade,Morada)::((solucoes(Id, utente(Id,Nome,Idade,Morada), U), comprimento(U,N), N==1)).
++utente(Id,_,_,_)::((solucoes(Id, utente(Id,_,_,_), U), comprimento(U,N), N==1)).
 
 % Invariante Estrutural:  nao permitir a insercao de conhecimento
 %                         repetido para o prestador
@@ -371,10 +372,19 @@ troca(A,_) :- assert(A), !, fail.
 
 +inst(Id,Nome,Cid) :: (solucoes(Id, inst(Id,Nome,Cid),S), comprimento(S,N), N ==1).
 
+%Invariante estrutural: nao permite inserção de conhecimento repetido para a data. 
+
++data(IdD,_,_,_) :: (solucoes(data(IdD,Ano,Mes,Dia), data(IdD,_,_,_), R), comprimento(R,N), N ==1).
+
 %Invariante estrutural: nao permite a inserção de um cuidado cujo id de utente e 
 %						de prestador não façam parte da base de conhecimento
 
-+cuidado(Data,IdU,IdPrest,Prio,Desc,Custo):: (utentes_de_esp(IdU,_,_,_), prestador(IdPrest,_,_,_)).
++cuidado(Data,IdU,IdPrest,Prio,Desc,Custo) :: (utentes_de_esp(IdU,_,_,_), prestador(IdPrest,_,_,_)).
+
+
+%%Invariante estrutural que garante que duas datas com Id diferentes não têm os mesmo dados
+
++data(_,Ano,Mes,Dia) :: (solucoes((Ano,Mes,Dia), data(_,Ano,Mes,Dia), R), comprimento(R,N), N==1).
 
 
 %Invariante estrutural para controlo de remoção de utente, prestador, cuidado e instituição
@@ -438,7 +448,7 @@ removeInst(IdInst) :- involucao(inst(IdInst,_,_)).
 % 3-------------------------------------------------------------
 % Identificar os utentes por critérios de seleção 
 
-utenteID(ID,R) :- solucoes((ID,N,I,M), utente(ID,N,I,M), R).
+utenteID(ID,R) :- solucoes(utente(ID,N,I,M), utente(ID,N,I,M), [R|_]).
 utenteNome(Nome,R) :- solucoes((ID,Nome,I,M), utente(ID,Nome,I,M), R).
 utenteIdade(Idade,R) :- solucoes((ID,N,Idade,M),utente(ID,N,Idade,M),R).
 utenteMor(M,R) :- solucoes((ID,N,I,M),utente(ID,N,I,M),R).
