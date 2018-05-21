@@ -1,4 +1,4 @@
-Trabalhos práticos elaborados no âmbito da unidade curricular de Sistemas de Representação de Conhecimento e Raciocínio (SRCR).
+Trabalhos práticos elaborados no âmbito da unidade curricular de **Sistemas de Representação de Conhecimento e Raciocínio (SRCR)**.
 
 **1ºTP** - Programação em lógica e Invariantes (**PROLOG**)
 
